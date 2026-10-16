@@ -1,8 +1,7 @@
-# Zin-ESP32-Smart
+# Robo Dev
 
-Firmware cho mạch ESP32-S3-N16R8 (robot Voi / thiết bị Zin): mic INMP441, loa MAX98357A, LCD ST7789 1,54", cảm biến VL53L0X, động cơ 2 bánh, LED RGB.
+Phần mềm giúp người mới làm quen firmware ESP32: nạp và cập nhật firmware, cài Wi-Fi, kết nối xiaozhi.me, xem log, kiểm tra từng module, tùy chỉnh nối chân và lệnh điều khiển cho robot ESP32-S3 (mic INMP441, loa MAX98357A, LCD ST7789, cảm biến VL53L0X/VL6180X, động cơ, LED WS2812).
 
-Trạng thái: mới khởi tạo, chưa có code firmware.
+Trạng thái: đang thiết kế, chưa có code. Xem [document.md](document.md).
 
-- Phần cứng và chân GPIO: [docs/hardware.md](docs/hardware.md)
-- Build: ESP-IDF v6.x, target `esp32s3`.
+- Phần cứng: [docs/hardware.md](docs/hardware.md)
