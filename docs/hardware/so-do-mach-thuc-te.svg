@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1000" height="780" fill="#ffffff"/>
+  <text x="500" y="32" text-anchor="middle" font-size="22" font-weight="700" fill="#111">Sơ đồ đấu dây ai-box-robot-s3cam (đã sửa theo mạch thực tế)</text>
+  <text x="500" y="54" text-anchor="middle" font-size="13" fill="#555">Sơ đồ logic: mỗi dây ghi số GPIO. Khớp với main/boards/ai-box-robot-s3cam/config.h</text>
+
+  <!-- ESP32 -->
+  <rect x="380" y="80" width="240" height="640" rx="10" fill="#2b2b2b"/>
+  <text x="500" y="310" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">ESP32-S3</text>
+  <text x="500" y="334" text-anchor="middle" font-size="14" fill="#ddd">N16R8</text>
+  <text x="500" y="356" text-anchor="middle" font-size="12" fill="#bbb">(COM3 – CH343)</text>
+
+  <!-- Motor driver -->
+  <rect x="40" y="100" width="180" height="170" rx="8" fill="#f4d9d0" stroke="#b5533c" stroke-width="2"/>
+  <text x="130" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#7a2e1b">L9110S (động cơ)</text>
+  <g stroke-width="3" fill="none">
+    <path d="M220 140 H380" stroke="#e0a800"/>
+    <path d="M220 180 H380" stroke="#e0a800"/>
+    <path d="M220 220 H380" stroke="#e0a800"/>
+    <path d="M220 260 H380" stroke="#e0a800"/>
+  </g>
+  <g font-size="12" fill="#222">
+    <text x="48" y="144">IN1</text><text x="48" y="184">IN2</text><text x="48" y="224">IN3</text><text x="48" y="264">IN4</text>
+    <text x="388" y="144" fill="#fff">GPIO17</text><text x="388" y="184" fill="#fff">GPIO18</text>
+    <text x="388" y="224" fill="#fff">GPIO3</text><text x="388" y="264" fill="#fff">GPIO14</text>
+  </g>
+
+  <!-- VL53L0X -->
+  <rect x="40" y="320" width="180" height="120" rx="8" fill="#e3e0f1" stroke="#5b4fa3" stroke-width="2"/>
+  <text x="130" y="342" text-anchor="middle" font-size="14" font-weight="700" fill="#3a2f7a">VL53L0X (khoảng cách)</text>
+  <g stroke-width="3" fill="none">
+    <path d="M220 380 H380" stroke="#e07a00"/>
+    <path d="M220 420 H380" stroke="#2e9a3e"/>
+  </g>
+  <g font-size="12" fill="#222">
+    <text x="48" y="384">SDA</text><text x="48" y="424">SCL</text>
+    <text x="388" y="384" fill="#fff">GPIO38</text><text x="388" y="424" fill="#fff">GPIO45</text>
+    <text x="48" y="360" fill="#555">VIN = 3V3, GND</text>
+  </g>
+
+  <!-- Amp -->
+  <rect x="780" y="100" width="180" height="190" rx="8" fill="#ead6f3" stroke="#7a3a9a" stroke-width="2"/>
+  <text x="870" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#4b1f66">MAX98357A (loa)</text>
+  <g stroke-width="3" fill="none">
+    <path d="M620 140 H780" stroke="#e0a800"/>
+    <path d="M620 180 H780" stroke="#e86aa0"/>
+    <path d="M620 220 H780" stroke="#2f4fd0"/>
+  </g>
+  <g font-size="12" fill="#222">
+    <text x="788" y="144">LRC</text><text x="788" y="184">BCLK</text><text x="788" y="224">DIN</text>
+    <text x="570" y="144" text-anchor="end" fill="#fff">GPIO16</text>
+    <text x="570" y="184" text-anchor="end" fill="#fff">GPIO15</text>
+    <text x="570" y="224" text-anchor="end" fill="#fff">GPIO7</text>
+    <text x="788" y="250" fill="#444">Vin = 3V3, GND = GND</text>
+    <text x="788" y="268" fill="#444">SD, GAIN: kiểm tra lại</text>
+    <text x="788" y="284" fill="#444">Loa 4–8Ω vào (+)(−)</text>
+  </g>
+
+  <!-- Mic -->
+  <rect x="780" y="320" width="180" height="165" rx="8" fill="#d6ecd9" stroke="#2e7d3e" stroke-width="2"/>
+  <text x="870" y="342" text-anchor="middle" font-size="14" font-weight="700" fill="#1d5a2a">INMP441 (mic)</text>
+  <g stroke-width="3" fill="none">
+    <path d="M620 380 H780" stroke="#e0a800"/>
+    <path d="M620 420 H780" stroke="#2e9a3e"/>
+    <path d="M620 460 H780" stroke="#2f4fd0"/>
+  </g>
+  <g font-size="12" fill="#222">
+    <text x="788" y="384">WS</text><text x="788" y="424">SCK</text><text x="788" y="464" fill="#000">SD</text>
+    <text x="570" y="384" text-anchor="end" fill="#fff">GPIO4</text>
+    <text x="570" y="424" text-anchor="end" fill="#fff">GPIO5</text>
+    <text x="570" y="464" text-anchor="end" fill="#fff">GPIO6</text>
+    <text x="900" y="360" text-anchor="middle" fill="#555">VDD = 3V3</text>
+  </g>
+  <text x="788" y="480" font-size="11" fill="#555">GND, L/R → GND (cần kiểm tra)</text>
+
+  <!-- LCD -->
+  <rect x="780" y="500" width="180" height="200" rx="8" fill="#d6e6f5" stroke="#2a6aa8" stroke-width="2"/>
+  <text x="870" y="522" text-anchor="middle" font-size="14" font-weight="700" fill="#173f66">ST7789 240x240</text>
+  <g stroke-width="3" fill="none">
+    <path d="M620 540 H780" stroke="#2e9a3e"/>
+    <path d="M620 580 H780" stroke="#2f4fd0"/>
+    <path d="M620 620 H780" stroke="#7b3fa0"/>
+    <path d="M620 660 H780" stroke="#e07a00"/>
+  </g>
+  <g font-size="12" fill="#222">
+    <text x="788" y="544">SCL</text><text x="788" y="584">SDA</text><text x="788" y="624">DC</text><text x="788" y="664">RES</text>
+    <text x="570" y="544" text-anchor="end" fill="#fff">GPIO19</text>
+    <text x="570" y="584" text-anchor="end" fill="#fff">GPIO20</text>
+    <text x="570" y="624" text-anchor="end" fill="#fff">GPIO47</text>
+    <text x="570" y="664" text-anchor="end" fill="#fff">GPIO21</text>
+    <text x="788" y="686" fill="#444">VCC, BLK = 3V3 · CS = GND</text>
+  </g>
+
+  <!-- Notes -->
+  <rect x="40" y="480" width="300" height="220" rx="8" fill="#f6f6f6" stroke="#999"/>
+  <text x="52" y="504" font-size="14" font-weight="700" fill="#111">Lưu ý</text>
+  <g font-size="12" fill="#222">
+    <text x="52" y="528">• Loa MAX98357A đã đổi sang GPIO16 / 15 / 7</text>
+    <text x="52" y="548">  (trước đây sơ đồ ghi 41 / 40 / 39).</text>
+    <text x="52" y="572">• Tránh GPIO43/44 (UART COM) và GPIO19/20</text>
+    <text x="52" y="592">  (USB gốc, đang dùng cho LCD).</text>
+    <text x="52" y="616">• Mọi module chung GND với ESP32.</text>
+    <text x="52" y="640">• Nguồn: pin/USB → 5V ESP32, module 3V3.</text>
+    <text x="52" y="664">• Phần motor, cảm biến, LCD lấy theo</text>
+    <text x="52" y="684">  config.h, chưa kiểm tra bằng ảnh thực tế.</text>
+  </g>
+</svg>

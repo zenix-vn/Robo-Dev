@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1180" width="1480" height="1180" font-family="Segoe UI, Arial, sans-serif">
+<rect width="1480" height="1180" fill="#ffffff"/>
+<text x="740" y="34" font-size="28" font-weight="700" text-anchor="middle" fill="#c62828">SƠ ĐỒ TEST: ESP32-S3 + MIC + LOA</text>
+<text x="740" y="58" font-size="14" text-anchor="middle" fill="#444">Chỉ cần 3 mạch: ESP32, mic INMP441, khuếch đại MAX98357A + loa. Cấp nguồn bằng cáp USB-C cắm vào cổng COM3. Đọc theo NHÃN CHÂN trên mạch.</text>
+<rect x="560" y="110" width="300" height="760" rx="10" fill="#263238"/>
+<rect x="640" y="118" width="140" height="60" rx="4" fill="#cfd8dc"/>
+<text x="710" y="152" font-size="13" text-anchor="middle" fill="#263238" font-weight="700">ESP32-S3-N16R8</text>
+<rect x="618" y="780" width="60" height="70" rx="6" fill="#b0bec5"/>
+<text x="648" y="819" font-size="12" text-anchor="middle" fill="#263238" font-weight="700">USB</text>
+<text x="648" y="836" font-size="11" text-anchor="middle" fill="#263238">COM3</text>
+<rect x="742" y="780" width="60" height="70" rx="6" fill="#78909c"/>
+<text x="772" y="819" font-size="12" text-anchor="middle" fill="#fff" font-weight="700">USB</text>
+<text x="772" y="836" font-size="11" text-anchor="middle" fill="#fff">native</text>
+<circle cx="570" cy="190" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="194" font-size="11" text-anchor="start" fill="#fff" font-weight="700">3V3</text>
+<circle cx="570" cy="220" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="224" font-size="11" text-anchor="start" fill="#90a4ae">3V3</text>
+<circle cx="570" cy="250" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="254" font-size="11" text-anchor="start" fill="#90a4ae">RST</text>
+<circle cx="570" cy="280" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="284" font-size="11" text-anchor="start" fill="#90a4ae">GPIO4</text>
+<circle cx="570" cy="310" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="314" font-size="11" text-anchor="start" fill="#90a4ae">GPIO5</text>
+<circle cx="570" cy="340" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="344" font-size="11" text-anchor="start" fill="#90a4ae">GPIO6</text>
+<circle cx="570" cy="370" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="374" font-size="11" text-anchor="start" fill="#90a4ae">GPIO7</text>
+<circle cx="570" cy="400" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="404" font-size="11" text-anchor="start" fill="#90a4ae">GPIO15</text>
+<circle cx="570" cy="430" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="434" font-size="11" text-anchor="start" fill="#90a4ae">GPIO16</text>
+<circle cx="570" cy="460" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="464" font-size="11" text-anchor="start" fill="#90a4ae">GPIO17</text>
+<circle cx="570" cy="490" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="494" font-size="11" text-anchor="start" fill="#90a4ae">GPIO18</text>
+<circle cx="570" cy="520" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="524" font-size="11" text-anchor="start" fill="#90a4ae">GPIO8</text>
+<circle cx="570" cy="550" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="554" font-size="11" text-anchor="start" fill="#90a4ae">GPIO3</text>
+<circle cx="570" cy="580" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="584" font-size="11" text-anchor="start" fill="#90a4ae">GPIO46</text>
+<circle cx="570" cy="610" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="614" font-size="11" text-anchor="start" fill="#90a4ae">GPIO9</text>
+<circle cx="570" cy="640" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="644" font-size="11" text-anchor="start" fill="#90a4ae">GPIO10</text>
+<circle cx="570" cy="670" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="674" font-size="11" text-anchor="start" fill="#90a4ae">GPIO11</text>
+<circle cx="570" cy="700" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="704" font-size="11" text-anchor="start" fill="#90a4ae">GPIO12</text>
+<circle cx="570" cy="730" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="734" font-size="11" text-anchor="start" fill="#90a4ae">GPIO13</text>
+<circle cx="570" cy="760" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="764" font-size="11" text-anchor="start" fill="#90a4ae">GPIO14</text>
+<circle cx="570" cy="790" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="794" font-size="11" text-anchor="start" fill="#fff" font-weight="700">5Vin</text>
+<circle cx="570" cy="820" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="579" y="824" font-size="11" text-anchor="start" fill="#90a4ae">GND</text>
+<circle cx="850" cy="190" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="194" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GND</text>
+<circle cx="850" cy="220" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="224" font-size="11" text-anchor="end" fill="#90a4ae">TX</text>
+<circle cx="850" cy="250" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="254" font-size="11" text-anchor="end" fill="#90a4ae">RX</text>
+<circle cx="850" cy="280" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="284" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO1</text>
+<circle cx="850" cy="310" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="314" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO2</text>
+<circle cx="850" cy="340" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="344" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO42</text>
+<circle cx="850" cy="370" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="374" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO41</text>
+<circle cx="850" cy="400" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="404" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO40</text>
+<circle cx="850" cy="430" r="4.5" fill="#ffd54f" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="434" font-size="11" text-anchor="end" fill="#fff" font-weight="700">GPIO39</text>
+<circle cx="850" cy="460" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="464" font-size="11" text-anchor="end" fill="#90a4ae">GPIO38</text>
+<circle cx="850" cy="490" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="494" font-size="11" text-anchor="end" fill="#90a4ae">GPIO37</text>
+<circle cx="850" cy="520" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="524" font-size="11" text-anchor="end" fill="#90a4ae">GPIO36</text>
+<circle cx="850" cy="550" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="554" font-size="11" text-anchor="end" fill="#90a4ae">GPIO35</text>
+<circle cx="850" cy="580" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="584" font-size="11" text-anchor="end" fill="#90a4ae">GPIO0</text>
+<circle cx="850" cy="610" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="614" font-size="11" text-anchor="end" fill="#90a4ae">GPIO45</text>
+<circle cx="850" cy="640" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="644" font-size="11" text-anchor="end" fill="#90a4ae">GPIO48</text>
+<circle cx="850" cy="670" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="674" font-size="11" text-anchor="end" fill="#90a4ae">GPIO47</text>
+<circle cx="850" cy="700" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="704" font-size="11" text-anchor="end" fill="#90a4ae">GPIO21</text>
+<circle cx="850" cy="730" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="734" font-size="11" text-anchor="end" fill="#90a4ae">GPIO20</text>
+<circle cx="850" cy="760" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="764" font-size="11" text-anchor="end" fill="#90a4ae">GPIO19</text>
+<circle cx="850" cy="790" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="794" font-size="11" text-anchor="end" fill="#90a4ae">GND</text>
+<circle cx="850" cy="820" r="4.5" fill="#78909c" stroke="#fff" stroke-width="1.2"/>
+<text x="841" y="824" font-size="11" text-anchor="end" fill="#90a4ae">GND</text>
+<polyline points="570,190 540,190 540,92 1330,92 1330,280" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="570,190 540,190 540,92 1330,92 1330,280" fill="none" stroke="#e53935" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,190 1390,190 1390,540" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,190 1390,190 1390,540" fill="none" stroke="#222222" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="570,790 500,790 500,965 1360,965 1360,510" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="570,790 500,790 500,965 1360,965 1360,510" fill="none" stroke="#ef6c00" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="500" cy="790" r="5.5" fill="#ef6c00" stroke="#fff" stroke-width="1.2"/>
+<rect x="1070" y="235" width="190" height="195" rx="9" fill="#00897b" fill-opacity="0.11" stroke="#00897b" stroke-width="2.2"/>
+<text x="1165.0" y="256" font-size="14" text-anchor="middle" fill="#111" font-weight="700">MIC INMP441</text>
+<text x="1165.0" y="272" font-size="11" text-anchor="middle" fill="#555">chân L/R nối GND</text>
+<circle cx="1070" cy="280" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="284" font-size="12" text-anchor="start" fill="#111" font-weight="700">WS</text>
+<polyline points="850,280 1070,280" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,280 1070,280" fill="none" stroke="#fb8c00" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1070" cy="310" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="314" font-size="12" text-anchor="start" fill="#111" font-weight="700">SCK</text>
+<polyline points="850,310 1070,310" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,310 1070,310" fill="none" stroke="#43a047" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1070" cy="340" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="344" font-size="12" text-anchor="start" fill="#111" font-weight="700">SD</text>
+<polyline points="850,340 1070,340" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,340 1070,340" fill="none" stroke="#1e88e5" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1070" y="445" width="190" height="205" rx="9" fill="#c2185b" fill-opacity="0.11" stroke="#c2185b" stroke-width="2.2"/>
+<text x="1165.0" y="466" font-size="14" text-anchor="middle" fill="#111" font-weight="700">KHUẾCH ĐẠI MAX98357A</text>
+<text x="1165.0" y="482" font-size="11" text-anchor="middle" fill="#555">GAIN, SD: để trống</text>
+<circle cx="1070" cy="505" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="509" font-size="12" text-anchor="start" fill="#111" font-weight="700">LRC</text>
+<polyline points="850,370 1040,370 1040,505 1070,505" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,370 1040,370 1040,505 1070,505" fill="none" stroke="#f9a825" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1070" cy="535" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="539" font-size="12" text-anchor="start" fill="#111" font-weight="700">BCLK</text>
+<polyline points="850,400 1020,400 1020,535 1070,535" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,400 1020,400 1020,535 1070,535" fill="none" stroke="#ec407a" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1070" cy="565" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1079" y="569" font-size="12" text-anchor="start" fill="#111" font-weight="700">DIN</text>
+<polyline points="850,430 1000,430 1000,565 1070,565" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,430 1000,430 1000,565 1070,565" fill="none" stroke="#8e24aa" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1165" y="626" font-size="11" text-anchor="middle" fill="#555">đầu ra loa</text>
+<circle cx="1115" cy="650" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1124" y="654" font-size="12" text-anchor="start" fill="#111" font-weight="700">−</text>
+<circle cx="1215" cy="650" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1224" y="654" font-size="12" text-anchor="start" fill="#111" font-weight="700">+</text>
+<rect x="1070" y="690" width="190" height="60" rx="9" fill="#2e7d32" fill-opacity="0.11" stroke="#2e7d32" stroke-width="2.2"/>
+<text x="1165.0" y="711" font-size="14" text-anchor="middle" fill="#111" font-weight="700">LOA</text>
+<circle cx="1165" cy="733" r="10" fill="#37474f"/>
+<polyline points="1115,650 1115,690" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1115,650 1115,690" fill="none" stroke="#222222" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1215,650 1215,690" fill="none" stroke="#fff" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1215,650 1215,690" fill="none" stroke="#e53935" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1123" y="676" font-size="11" text-anchor="start" fill="#333">đen</text>
+<text x="1223" y="676" font-size="11" text-anchor="start" fill="#c62828">đỏ</text>
+<circle cx="1260" cy="280" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1251" y="284" font-size="12" text-anchor="end" fill="#111" font-weight="700">VDD</text>
+<polyline points="1260,280 1330,280" fill="none" stroke="#fff" stroke-width="7.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1260,280 1330,280" fill="none" stroke="#e53935" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1330" cy="280" r="5" fill="#e53935" stroke="#fff" stroke-width="1.2"/>
+<circle cx="1260" cy="310" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1251" y="314" font-size="12" text-anchor="end" fill="#111" font-weight="700">GND</text>
+<polyline points="1260,310 1390,310" fill="none" stroke="#fff" stroke-width="7.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1260,310 1390,310" fill="none" stroke="#222222" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1390" cy="310" r="5" fill="#222222" stroke="#fff" stroke-width="1.2"/>
+<circle cx="1260" cy="340" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1251" y="344" font-size="12" text-anchor="end" fill="#111" font-weight="700">L/R</text>
+<polyline points="1260,340 1390,340" fill="none" stroke="#fff" stroke-width="7.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1260,340 1390,340" fill="none" stroke="#222222" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1390" cy="340" r="5" fill="#222222" stroke="#fff" stroke-width="1.2"/>
+<circle cx="1260" cy="510" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1251" y="514" font-size="12" text-anchor="end" fill="#111" font-weight="700">Vin</text>
+<polyline points="1260,510 1360,510" fill="none" stroke="#fff" stroke-width="7.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1260,510 1360,510" fill="none" stroke="#ef6c00" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1360" cy="510" r="5" fill="#ef6c00" stroke="#fff" stroke-width="1.2"/>
+<circle cx="1260" cy="540" r="4" fill="#b8860b" stroke="#fff" stroke-width="1.2"/>
+<text x="1251" y="544" font-size="12" text-anchor="end" fill="#111" font-weight="700">GND</text>
+<polyline points="1260,540 1390,540" fill="none" stroke="#fff" stroke-width="7.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1260,540 1390,540" fill="none" stroke="#222222" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1390" cy="540" r="5" fill="#222222" stroke="#fff" stroke-width="1.2"/>
+<text x="1330" y="80" font-size="12" text-anchor="middle" fill="#e53935" font-weight="700">3V3</text>
+<text x="1390" y="564" font-size="12" text-anchor="middle" fill="#222222" font-weight="700">GND</text>
+<text x="1360" y="989" font-size="12" text-anchor="middle" fill="#ef6c00" font-weight="700">5V</text>
+<rect x="590" y="905" width="116" height="46" rx="8" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="648" y="927" font-size="12" text-anchor="middle" fill="#111" font-weight="700">CÁP USB-C</text>
+<text x="648" y="944" font-size="11" text-anchor="middle" fill="#444">vào máy tính</text>
+<line x1="648" y1="870" x2="648" y2="905" stroke="#455a64" stroke-width="5"/>
+<rect x="20" y="990" width="680" height="170" rx="8" fill="#fffde7" stroke="#f9a825"/>
+<text x="34" y="1016" font-size="14" text-anchor="start" fill="#c62828" font-weight="700">CÁCH NỐI VÀ KIỂM TRA</text>
+<text x="34" y="1040" font-size="13" text-anchor="start" fill="#333">• Mic INMP441: chân L/R nối GND, VDD nối 3V3.   • MAX98357A: chân GAIN và SD để trống, Vin nối 5V.</text>
+<text x="34" y="1064" font-size="13" text-anchor="start" fill="#333">• Loa: dây đỏ vào + (bên phải), dây đen vào − (bên trái) của MAX98357A.</text>
+<text x="34" y="1088" font-size="13" text-anchor="start" fill="#333">• Khi cắm USB, chân "5Vin" của ESP32 có điện 5V để cấp cho MAX98357A.</text>
+<text x="34" y="1112" font-size="13" text-anchor="start" fill="#333">• Sau khi nối, cấp nguồn: robot sẽ phát tiếng khi nhấn nút BOOT hoặc khi được kích hoạt.</text>
+<text x="34" y="1136" font-size="13" text-anchor="start" fill="#333">• Sơ đồ vẽ các chân theo thứ tự thuận tiện, luôn đọc theo NHÃN CHÂN thật trên mạch.</text>
+<rect x="730" y="990" width="240" height="120" rx="8" fill="#fafafa" stroke="#bbb"/>
+<line x1="745" y1="1015" x2="785" y2="1015" stroke="#e53935" stroke-width="3.6"/>
+<text x="795" y="1019" font-size="12" text-anchor="start" fill="#111">3V3</text>
+<line x1="745" y1="1041" x2="785" y2="1041" stroke="#ef6c00" stroke-width="3.6"/>
+<text x="795" y="1045" font-size="12" text-anchor="start" fill="#111">5V</text>
+<line x1="745" y1="1067" x2="785" y2="1067" stroke="#222222" stroke-width="3.6"/>
+<text x="795" y="1071" font-size="12" text-anchor="start" fill="#111">GND</text>
+<line x1="745" y1="1093" x2="785" y2="1093" stroke="#1e88e5" stroke-width="3.6"/>
+<text x="795" y="1097" font-size="12" text-anchor="start" fill="#111">Tín hiệu (màu riêng mỗi dây)</text>
+</svg>
