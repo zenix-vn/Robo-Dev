@@ -139,6 +139,8 @@ cd ..\app
 
 Mở Robo Dev → **5. Nạp & kết nối** → chọn gói vừa tạo → **Nạp nhanh**.
 
+Gói nằm ở `app\firmware\<tên>-<phiên bản>\`, ví dụ `app\firmware\robo-dev-1.0.1\`. Muốn nạp bằng công cụ khác (ESP Flash Download Tool, trang web nạp ESP...), dùng file cùng tên gói, ví dụ `robo-dev-1.0.1.bin`, ghi từ địa chỉ `0x0`. Cách này xóa Wi-Fi đã lưu. Các file còn lại trong thư mục là từng phần của cùng bản build, dùng cho nạp nhanh.
+
 ### 2.5. Sửa ở đâu
 
 Thư mục `firmware\` tách riêng code của mình và thư viện của người khác (chi tiết: [firmware/README.md](firmware/README.md)):

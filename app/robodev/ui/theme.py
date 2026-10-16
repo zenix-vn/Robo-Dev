@@ -30,11 +30,15 @@ LIGHT = {
     "danger_text": "#B42318",
     "info_soft": "#F0F9FF",
     "info_text": "#026AA2",
-    "sidebar": "#0B1221",
-    "sidebar_hover": "#16203A",
-    "sidebar_active": "#1E2A4A",
-    "sidebar_text": "#CBD5E1",
-    "sidebar_muted": "#64748B",
+    "sidebar": "#FFFFFF",
+    "sidebar_border": "#E4E7EC",
+    "sidebar_hover": "#F2F4F7",
+    "sidebar_active": "#EEF2FF",
+    "sidebar_field": "#F9FAFB",
+    "sidebar_text": "#344054",
+    "sidebar_muted": "#667085",
+    "sidebar_strong": "#101828",
+    "sidebar_accent": "#4F46E5",
     "console_bg": "#0B1221",
     "console_text": "#D0D5DD",
     "board": "#1B2536",
@@ -67,8 +71,14 @@ DARK.update({
     "info_soft": "#062033",
     "info_text": "#7CD4FD",
     "sidebar": "#070B14",
+    "sidebar_border": "#1A2440",
     "sidebar_hover": "#111829",
     "sidebar_active": "#1A2440",
+    "sidebar_field": "#070B14",
+    "sidebar_text": "#CBD5E1",
+    "sidebar_muted": "#64748B",
+    "sidebar_strong": "#FFFFFF",
+    "sidebar_accent": "#A5B4FC",
     "console_bg": "#070B14",
     "board": "#18202F",
     "board_edge": "#2C3A52",
@@ -144,8 +154,8 @@ QScrollArea {{ background: transparent; border: none; }}
 QToolTip {{ background: {k['text']}; color: {k['surface']}; border: none; padding: 6px 8px; border-radius: 6px; }}
 
 /* ---------- Sidebar ---------- */
-QWidget#Sidebar {{ background: {k['sidebar']}; }}
-QLabel#Brand {{ color: #FFFFFF; font-size: 15pt; font-weight: 700; }}
+QWidget#Sidebar {{ background: {k['sidebar']}; border-right: 1px solid {k['sidebar_border']}; }}
+QLabel#Brand {{ color: {k['sidebar_strong']}; font-size: 15pt; font-weight: 700; }}
 QLabel#BrandSub {{ color: {k['sidebar_muted']}; font-size: 8.5pt; }}
 QLabel#SideCaption {{ color: {k['sidebar_muted']}; font-size: 8pt; font-weight: 600; }}
 QPushButton#NavItem {{
@@ -153,18 +163,18 @@ QPushButton#NavItem {{
     text-align: left; padding: 9px 12px; font-size: 10pt; font-weight: 500;
 }}
 QPushButton#NavItem:hover {{ background: {k['sidebar_hover']}; }}
-QPushButton#NavItem:checked {{ background: {k['sidebar_active']}; color: #FFFFFF; font-weight: 600; }}
+QPushButton#NavItem:checked {{ background: {k['sidebar_active']}; color: {k['sidebar_strong']}; font-weight: 600; }}
 QPushButton#ProjectButton {{
-    background: {k['sidebar_hover']}; color: #FFFFFF; border: 1px solid {k['sidebar_active']}; border-radius: 10px;
+    background: {k['sidebar_hover']}; color: {k['sidebar_strong']}; border: 1px solid {k['sidebar_border']}; border-radius: 10px;
     text-align: left; padding: 8px 12px; font-weight: 600;
 }}
 QPushButton#ProjectButton:hover {{ background: {k['sidebar_active']}; }}
 QPushButton#ProjectButton::menu-indicator {{ subcontrol-position: right center; right: 10px; }}
-QFrame#DeviceBox {{ background: {k['sidebar_hover']}; border: 1px solid {k['sidebar_active']}; border-radius: 12px; }}
-QLabel#DeviceTitle {{ color: #FFFFFF; font-weight: 600; }}
+QFrame#DeviceBox {{ background: {k['sidebar_hover']}; border: 1px solid {k['sidebar_border']}; border-radius: 12px; }}
+QLabel#DeviceTitle {{ color: {k['sidebar_strong']}; font-weight: 600; }}
 QLabel#DeviceSub {{ color: {k['sidebar_muted']}; font-size: 8.5pt; }}
 QComboBox#PortCombo {{
-    background: {k['sidebar']}; color: #FFFFFF; border: 1px solid {k['sidebar_active']}; border-radius: 8px;
+    background: {k['sidebar_field']}; color: {k['sidebar_strong']}; border: 1px solid {k['sidebar_border']}; border-radius: 8px;
     padding: 5px 8px; min-height: 22px;
 }}
 QComboBox#PortCombo QAbstractItemView {{ background: {k['surface']}; color: {k['text']}; }}

@@ -165,8 +165,57 @@ public:
         lv_obj_move_foreground(panel_);
     }
 
+    // Screen check for the Robo Dev test page: red, green and blue bars (left to right) inside a white
+    // frame, drawn above everything for `seconds` (1-15). Wrong colours show inverted colours or a swapped
+    // RGB order; a missing white edge shows a wrong offset or mirror setting.
+    void ShowTestPattern(int seconds) {
+        seconds = seconds < 1 ? 1 : (seconds > 15 ? 15 : seconds);
+        {
+            DisplayLockGuard lock(this);
+            if (test_overlay_ == nullptr) {
+                test_overlay_ = lv_obj_create(lv_layer_top());
+                lv_obj_remove_style_all(test_overlay_);
+                lv_obj_set_size(test_overlay_, LV_HOR_RES, LV_VER_RES);
+                lv_obj_set_pos(test_overlay_, 0, 0);
+                lv_obj_set_style_bg_color(test_overlay_, lv_color_white(), 0);
+                lv_obj_set_style_bg_opa(test_overlay_, LV_OPA_COVER, 0);
+                lv_obj_set_style_pad_all(test_overlay_, 8, 0);   // white frame around the bars
+                lv_obj_set_style_pad_column(test_overlay_, 0, 0);
+                lv_obj_set_flex_flow(test_overlay_, LV_FLEX_FLOW_ROW);
+                lv_obj_remove_flag(test_overlay_, LV_OBJ_FLAG_SCROLLABLE);
+                for (uint32_t color : {0xFF0000u, 0x00FF00u, 0x0000FFu}) {
+                    lv_obj_t* bar = lv_obj_create(test_overlay_);
+                    lv_obj_remove_style_all(bar);
+                    lv_obj_set_flex_grow(bar, 1);
+                    lv_obj_set_height(bar, LV_PCT(100));
+                    lv_obj_set_style_bg_color(bar, lv_color_hex(color), 0);
+                    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+                }
+            }
+            lv_obj_remove_flag(test_overlay_, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_move_foreground(test_overlay_);
+        }
+        if (test_timer_ == nullptr) {
+            esp_timer_create_args_t args = {};
+            args.callback = [](void* arg) {
+                auto self = static_cast<RobotDisplay*>(arg);
+                DisplayLockGuard lock(self);
+                lv_obj_add_flag(self->test_overlay_, LV_OBJ_FLAG_HIDDEN);
+            };
+            args.arg = this;
+            args.name = "rd_lcd_test";
+            esp_timer_create(&args, &test_timer_);
+        }
+        if (test_timer_ != nullptr) {
+            esp_timer_stop(test_timer_);
+            esp_timer_start_once(test_timer_, (uint64_t)seconds * 1000000);
+        }
+    }
+
 private:
     std::function<void(const char*)> on_emotion_;
+    lv_obj_t* test_overlay_ = nullptr;
+    esp_timer_handle_t test_timer_ = nullptr;
     lv_obj_t* panel_ = nullptr;
     lv_obj_t* dist_panel_ = nullptr;
     lv_obj_t* dist_title_ = nullptr;
@@ -554,7 +603,14 @@ public:
         if (RobotConfig::Get().features.led) {
             led_ = new RobotLed(BUILTIN_LED_GPIO);
         }
-        new SerialSetup([this]() { return distance_sensor_.ready(); }, [this]() { return (int)distance_mm_; });
+        auto serial = new SerialSetup([this]() { return distance_sensor_.ready(); }, [this]() { return (int)distance_mm_; });
+        serial->SetLcdTest([this](int seconds) {
+            if (display_ == nullptr) {
+                return false;
+            }
+            display_->ShowTestPattern(seconds);
+            return true;
+        });
         AlarmChime::GetInstance().Start();        if (motors_ != nullptr) {
             behavior_ = new RobotBehavior(motors_, [this]() { return (int)distance_mm_; },
                                         distance_sensor_.ready());

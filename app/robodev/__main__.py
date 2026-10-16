@@ -32,6 +32,8 @@ def main(argv=None):
     app.installEventFilter(wheel_guard)
 
     state = AppState()
+    # Dừng phiên xem log và việc nền trước khi giao diện bị hủy
+    app.aboutToQuit.connect(lambda: (state.runner.stop(), state.runner.stop_monitor()))
     name = args.theme or state.settings.value("theme", "light")
     theme.apply(app, name)
     app.setWindowIcon(QIcon(icons.pixmap("robot", "#6366F1", 64)))

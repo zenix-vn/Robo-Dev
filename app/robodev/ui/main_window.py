@@ -60,8 +60,9 @@ class NavItem(QPushButton):
 
     def restyle(self):
         on = self.isChecked()
-        color = "#FFFFFF" if on else theme.c("sidebar_text")
-        self.icon_label.setPixmap(icons.pixmap(self.icon_name, "#A5B4FC" if on else theme.c("sidebar_muted"), 19))
+        color = theme.c("sidebar_strong") if on else theme.c("sidebar_text")
+        accent = theme.c("sidebar_accent") if on else theme.c("sidebar_muted")
+        self.icon_label.setPixmap(icons.pixmap(self.icon_name, accent, 19))
         self.text_label.setStyleSheet(f"color: {color}; font-weight: {600 if on else 500}; background: transparent;")
 
 
@@ -151,7 +152,7 @@ class MainWindow(QMainWindow):
         self.project_btn = QPushButton()
         self.project_btn.setObjectName("ProjectButton")
         self.project_btn.setCursor(Qt.PointingHandCursor)
-        self.project_btn.setIcon(icons.icon("file", "#A5B4FC", 16))
+        self.project_btn.setIcon(icons.icon("file", theme.c("sidebar_accent"), 16))
         menu = QMenu(self.project_btn)
         menu.addAction(icons.icon("plus", theme.c("text_soft"), 16), "Hồ sơ mới", self.new_project, QKeySequence.New)
         menu.addAction(icons.icon("folder", theme.c("text_soft"), 16), "Mở hồ sơ...", self.open_project, QKeySequence.Open)
@@ -360,6 +361,8 @@ class MainWindow(QMainWindow):
             self.state.set_firmware(event[1])
         elif event[0] == "caps":
             self.state.set_caps(event[1])
+        elif event[0] == "info":
+            self.state.set_info(event[1])
         for page in self.pages.values():
             page.on_event(job_id, event)
 

@@ -231,10 +231,13 @@ class DevicePage(Page):
         if not ok:
             return
         fw = result["firmware"]
+        boot = result.get("boot") or {}
         if not fw or not fw[0]:
-            self.t_fw.set(False, "Chưa có firmware", "Nạp firmware ở bước Nạp & kết nối.")
-            self.t_sensor.set(None, "Chưa biết")
-            self.t_net.set(None, "Chưa biết")
+            other = boot.get("version")
+            self.t_fw.set(False, f"Firmware khác: {other}" if other else "Không có firmware Robo Dev",
+                          "Nạp Robo Dev ở bước 5. Nạp & kết nối.")
+            self.t_sensor.set(None, "Chưa biết", "Cần firmware Robo Dev để đọc")
+            self.show_network(boot, {})
             return
         st.set_firmware(fw[1])
         info = result.get("info") or {}
@@ -249,14 +252,28 @@ class DevicePage(Page):
             self.t_sensor.set(True, "Có trả lời", "Cảm biến trả lời trên I2C")
         else:
             self.t_sensor.set("warn", "Không thấy", "Kiểm tra dây SDA/SCL, hoặc tắt cảm biến ở bước Nối chân.")
-        if "wifi" in info:
-            st.activated = info.get("activated")
-            if info.get("activated"):
-                self.t_net.set(True, "Đã kích hoạt", "Robot đã kết nối xiaozhi.me")
-            elif info.get("wifi"):
-                self.t_net.set("warn", "Có Wi-Fi", "Chưa kích hoạt xiaozhi.me")
-            else:
-                self.t_net.set("warn", "Chưa cài Wi-Fi", "Cài ở bước Nạp & kết nối")
-        else:
-            self.t_net.set(None, "Không rõ", "Firmware cũ không báo trạng thái Wi-Fi")
+        self.show_network(boot, info)
         st.device_changed.emit()
+
+    def show_network(self, boot, info):
+        """Wi-Fi và kích hoạt: ưu tiên RD_INFO, nếu không có thì đọc từ log khởi động."""
+        device_state = info.get("state")
+        working = {"idle", "connecting", "listening", "speaking", "notifying"}
+        activated = info.get("activated", boot.get("activated") or device_state in working)
+        wifi = boot.get("wifi")
+        has_wifi = info.get("wifi", bool(wifi) or info.get("wifi_saved", False))
+        self.state.activated = bool(activated)
+        if device_state == "wifi_configuring":
+            self.t_net.set("warn", "Chưa cài Wi-Fi", "Mạch đang chờ cài Wi-Fi. Cài ở bước Nạp & kết nối")
+        elif device_state == "activating" and not activated:
+            self.t_net.set("warn", "Đang kích hoạt", "Mạch đang chờ kích hoạt xiaozhi.me")
+        elif device_state == "starting" and not activated:
+            self.t_net.set(None, "Đang khởi động", "Bấm Kiểm tra mạch lại sau vài giây")
+        elif activated:
+            self.t_net.set(True, "Đã kích hoạt", f"Wi-Fi {wifi} · đã kết nối xiaozhi.me" if wifi else "Đã kết nối xiaozhi.me")
+        elif has_wifi:
+            self.t_net.set("warn", f"Có Wi-Fi {wifi}" if wifi else "Có Wi-Fi", "Chưa kích hoạt xiaozhi.me")
+        elif boot.get("no_wifi"):
+            self.t_net.set("warn", "Chưa cài Wi-Fi", "Cài ở bước Nạp & kết nối")
+        else:
+            self.t_net.set(None, "Không rõ", "Log khởi động không cho biết trạng thái Wi-Fi")

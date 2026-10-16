@@ -2,8 +2,9 @@
 
 Mỗi việc nhận `emit(kind, *args)` để báo tiến độ và `stop` (threading.Event) để dừng giữa chừng.
 Sự kiện: log(text), progress(percent), step(key, state, text), code(code), check(result),
-firmware(version), caps(list), test(module, step, ok, text), done(ok, message).
+firmware(version), info(dict từ RD_INFO), caps(list), test(module, step, ok, text), done(ok, message).
 """
+import json
 import queue
 import re
 import time
@@ -50,7 +51,7 @@ def _boot(session, emit, stop, label="Đợi mạch khởi động"):
 # Kiểm tra mạch
 # ----------------------------------------------------------------------------------------
 def job_check(port, emit, stop):
-    result = {"chip": None, "firmware": None, "info": None}
+    result = {"chip": None, "firmware": None, "info": None, "boot": None}
     ok, message = _chip(port, emit, stop)
     result["chip"] = (ok, message)
     if not ok:
@@ -60,14 +61,29 @@ def job_check(port, emit, stop):
     with open_session(port, emit) as session:
         session.reset()
         version = _boot(session, emit, stop)
+        result["boot"] = session.boot.as_dict()
         if not version:
-            result["firmware"] = (False, "Chưa có firmware Robo Dev (mạch trống hoặc firmware khác)")
+            other = session.boot.version
+            if other:
+                text = f"Mạch đang chạy firmware khác (phiên bản {other}), không hiểu lệnh của Robo Dev."
+            else:
+                text = "Mạch không trả lời và không in log khởi động: có thể chưa có firmware, hoặc log ra cổng khác."
+            result["firmware"] = (False, text)
             emit("check", result)
-            emit("done", True, "Mạch đúng loại nhưng chưa có firmware Robo Dev. Hãy nạp ở bước Nạp & kết nối.")
+            emit("done", True, text + " Hãy nạp firmware Robo Dev ở bước Nạp & kết nối.")
             return
         result["firmware"] = (True, version)
+        # Vừa khởi động lại thì mạch còn đang kết nối / kích hoạt: đợi xong rồi mới chốt trạng thái Wi-Fi
+        deadline = time.time() + 15
+        while time.time() < deadline and not stop.is_set():
+            if session.boot.activated or session.boot.no_wifi:
+                break
+            if any("WiFi connection timeout" in line for line in session.read_lines()):
+                break
+        result["boot"] = session.boot.as_dict()
         result["info"] = session.info()
         if result["info"] is not None:
+            emit("info", result["info"])
             emit("caps", result["info"].get("caps", []))
     emit("check", result)
     emit("done", True, "Đã kiểm tra xong mạch.")
@@ -81,6 +97,8 @@ def _apply(session, project, emit, stop):
     _step(emit, "config", "run", "Đang gửi...")
     info = session.info() or {}
     caps = set(info.get("caps", []))
+    if info:
+        emit("info", info)
     emit("caps", sorted(caps))
 
     if "hw" in caps:
@@ -258,6 +276,7 @@ def job_monitor(port, commands, emit, stop):
         if port == link.DEMO_PORT:
             session.reset()
         session.send("RD_PING")
+        session.send("RD_INFO")
         while not stop.is_set():
             try:
                 while True:
@@ -279,6 +298,13 @@ def job_monitor(port, commands, emit, stop):
                 m = re.search(r"RD_PONG\s*(.*)$", line)
                 if m:
                     emit("firmware", m.group(1).strip())
+                if line.startswith("RD_INFO {"):
+                    try:
+                        info = json.loads(line[len("RD_INFO "):])
+                        emit("info", info)
+                        emit("caps", info.get("caps", []))
+                    except ValueError:
+                        pass
                 for module, (step, needles, _) in list(pending.items()):
                     hit = next((n for n in needles if n in line), None)
                     if not hit:

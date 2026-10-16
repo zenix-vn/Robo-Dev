@@ -196,6 +196,50 @@ def flash_fast(port, package, include_assets, on_text, on_progress):
 
 
 # ----------------------------------------------------------------------------------------
+# Đọc log khởi động (biết được firmware, Wi-Fi, kích hoạt kể cả khi firmware không hiểu lệnh RD_)
+# ----------------------------------------------------------------------------------------
+class BootLog:
+    """Thông tin rút ra từ log khởi động của firmware dựa trên xiaozhi-esp32."""
+
+    PATTERNS = [
+        ("version", re.compile(r"App version:\s+(.+)$")),
+        ("version", re.compile(r"Ota: Current version: (.+)$")),
+        ("project", re.compile(r"Project name:\s+(\S+)")),
+        ("wifi", re.compile(r"Connected to WiFi: (.+)$")),
+        ("ip", re.compile(r"Got IP: (\S+)")),
+    ]
+    READY = re.compile(r"State: \S+ -> (idle|wifi_configuring)|STATE: idle|Activation done|entering setup mode")
+
+    def __init__(self):
+        self.clear()
+
+    def clear(self):
+        self.version = self.project = self.wifi = self.ip = None
+        self.activated = False
+        self.no_wifi = False
+        self.ready_at = None     # thời điểm firmware khởi động xong (rảnh hoặc chờ cài Wi-Fi)
+
+    def feed(self, line):
+        if line.startswith("ESP-ROM:") or line.startswith("rst:"):
+            self.clear()           # mạch vừa khởi động lại
+            return
+        for key, pattern in self.PATTERNS:
+            m = pattern.search(line)
+            if m and not (key == "version" and self.version):
+                setattr(self, key, m.group(1).strip())
+        if "Activation done" in line:
+            self.activated = True
+        if "wifi_configuring" in line or "entering setup mode" in line or "No saved Wi-Fi" in line:
+            self.no_wifi = True
+        if self.READY.search(line) and self.ready_at is None:
+            self.ready_at = time.time()
+
+    def as_dict(self):
+        return {"version": self.version, "project": self.project, "wifi": self.wifi, "ip": self.ip,
+                "activated": self.activated, "no_wifi": self.no_wifi, "booted": self.ready_at is not None}
+
+
+# ----------------------------------------------------------------------------------------
 # Phiên lệnh qua cổng log
 # ----------------------------------------------------------------------------------------
 class Session:
@@ -212,6 +256,7 @@ class Session:
                 self.port = native
         self.ser = serial.Serial(self.port, MONITOR_BAUD, timeout=0.2)
         self.buf = b""
+        self.boot = BootLog()
 
     def close(self):
         try:
@@ -249,6 +294,7 @@ class Session:
             line = ANSI.sub("", raw.decode("utf-8", "replace")).strip()
             if line:
                 out.append(line)
+                self.boot.feed(line)
                 self.on_line(line)
         return out
 
@@ -274,20 +320,43 @@ class Session:
                 turn += 1
         return None
 
-    def ping(self, timeout=25, stop=None):
-        """Đợi mạch khởi động xong và trả lời PONG. Trả về chuỗi phiên bản hoặc None."""
-        needles, probes = ("RD_PONG",), ["RD_PING"]
+    # Firmware đã khởi động xong mà sau chừng này giây vẫn không trả lời RD_PONG thì là firmware khác
+    FOREIGN_AFTER = 5.0
+
+    def _ping_loop(self, timeout, stop):
+        t0 = time.time()
+        last = 0.0
+        while time.time() - t0 < timeout:
+            if stop is not None and stop.is_set():
+                return None
+            for line in self.read_lines():
+                if "RD_PONG" in line:
+                    return line
+            now = time.time()
+            if now - t0 >= 2.0 and now - last >= 1.0:
+                last = now
+                self.send("RD_PING")
+            if self.boot.ready_at and now - self.boot.ready_at > self.FOREIGN_AFTER:
+                return None
+        return None
+
+    def ping(self, timeout=30, stop=None):
+        """Đợi mạch khởi động xong và trả lời RD_PONG. Trả về chuỗi phiên bản hoặc None.
+
+        Không đợi hết `timeout` nếu log cho thấy mạch đã chạy xong mà không hiểu RD_PING (firmware khác);
+        khi đó `self.boot` cho biết firmware đang chạy là gì."""
         first = timeout if self.port == self.flash_port else timeout * 0.6
-        line = self.wait_for(needles, first, resend=probes, resend_every=1.0, start_after=2.0, stop=stop)
-        if not line and self.port != self.flash_port and not (stop and stop.is_set()):
+        line = self._ping_loop(first, stop)
+        if not line and not self.boot.ready_at and self.port != self.flash_port and not (stop and stop.is_set()):
             # Firmware ghi log qua cổng COM (biến thể uart): thử lại trên cổng gốc
             self.on_line(f"[Robo Dev] Cổng {self.port} không trả lời, thử cổng {self.flash_port}.")
             self.ser.close()
             self.port = self.flash_port
             self.ser = serial.Serial(self.port, MONITOR_BAUD, timeout=0.2)
             self.buf = b""
+            self.boot.clear()
             self.reset()
-            line = self.wait_for(needles, timeout - first, resend=probes, resend_every=1.0, start_after=2.0, stop=stop)
+            line = self._ping_loop(timeout - first, stop)
         if not line:
             return None
         return line.split("RD_PONG", 1)[1].strip()
@@ -407,15 +476,15 @@ class Tracker:
                 return
         if "Activation done" in line:
             if self.states["code"] != "ok":
-                self.step("code", "skip", "Không có mã: thiết bị đã liên kết sẵn với một tài khoản")
+                self.step("code", "skip", "Không cần mã: thiết bị đã được kích hoạt từ trước")
             self.step("done", "ok", "Robot đã kết nối xiaozhi.me")
             self.finished = True
 
 
 NO_CODE_MESSAGE = (
-    "Robot đã kết nối xiaozhi.me, nhưng máy chủ không cấp mã mới vì thiết bị đã được liên kết với một tài khoản "
-    "từ trước. Muốn lấy mã mới: vào xiaozhi.me, hủy liên kết thiết bị khỏi agent rồi xóa thiết bị, sau đó cài "
-    "Wi-Fi lại.")
+    "Robot đã kết nối xiaozhi.me. Thiết bị đã được kích hoạt từ trước nên không cần mã mới. "
+    "(Muốn chuyển sang tài khoản khác: trên xiaozhi.me hủy liên kết thiết bị khỏi agent rồi xóa thiết bị, "
+    "sau đó cài Wi-Fi lại để nhận mã.)")
 
 
 def track_activation(session, emit, stop, timeout=180, wifi_started=True):

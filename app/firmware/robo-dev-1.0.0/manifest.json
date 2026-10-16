@@ -4,9 +4,9 @@
   "variant": "usb",
   "chip": "esp32s3",
   "flash_mb": 16,
-  "notes": "Firmware Robo Dev cho board robo-dev-s3. Chân GPIO cố định theo config.h; chưa hỗ trợ đổi chân lúc chạy và lệnh tùy chỉnh.",
+  "notes": "Firmware Robo Dev 1.0 cho board robo-dev-s3. Chân GPIO cố định theo config.h; chưa hỗ trợ đổi chân lúc chạy và lệnh tùy chỉnh.",
   "files": {
-    "full": "merged-binary.bin",
+    "full": "robo-dev-1.0.0.bin",
     "app": "xiaozhi.bin",
     "otadata": "ota_data_initial.bin",
     "partition_table": "partition-table.bin",

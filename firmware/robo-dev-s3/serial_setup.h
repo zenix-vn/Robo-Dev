@@ -20,6 +20,7 @@
 #include <sdkconfig.h>
 
 #include "application.h"
+#include "device_state_machine.h"
 #include "board.h"
 #include "codecs/no_audio_codec.h"
 #include "alarm_chime.h"
@@ -46,8 +47,9 @@
 //   RD_CFG_GET                       -> RD_CFG_JSON {json of the config in use}
 //   RD_CFG_CLEAR                     -> deletes the stored config, RD_CFG_OK, then restarts
 //   RD_TEST <module> [step]          -> runs a module check for the Robo Dev test page:
-//                                       RD_TEST_OK <module> [result] or RD_TEST_ERR <module> <reason>
-//                                       (speaker, mic and sensor; other modules reply RD_TEST_ERR)
+//                                       RD_TEST_OK <module> [result] or RD_TEST_ERR <module> <code>
+//                                       Modules with a check are listed in RD_INFO "tests".
+//                                       Codes: unsupported (no check for this module), no_sensor.
 class SerialSetup {
 public:
     static constexpr size_t kMaxLine = 4096;
@@ -74,10 +76,14 @@ public:
 #endif
     }
 
+    // Screen check (RD_TEST lcd): shows a test pattern for the given seconds; false = no screen.
+    void SetLcdTest(std::function<bool(int)> lcd_test) { lcd_test_ = std::move(lcd_test); }
+
 private:
     static constexpr const char* TAG = "SerialSetup";
     std::function<bool()> sensor_ready_;
     std::function<int()> distance_mm_;
+    std::function<bool(int)> lcd_test_;
     volatile bool beeping_ = false;
 
     void Run() {
@@ -260,15 +266,21 @@ private:
             Reply("RD_TEST_OK speaker");
         } else if (module == "mic") {
             Reply("RD_TEST_OK mic " + MicLevel());
+        } else if (module == "lcd") {
+            if (!lcd_test_ || !lcd_test_(5)) {
+                Reply("RD_TEST_ERR lcd unsupported");
+                return;
+            }
+            Reply("RD_TEST_OK lcd");
         } else if (module == "sensor") {
             if (!sensor_ready_ || !sensor_ready_()) {
-                Reply("RD_TEST_ERR sensor cam bien khong tra loi tren I2C");
+                Reply("RD_TEST_ERR sensor no_sensor");
                 return;
             }
             int mm = distance_mm_ ? distance_mm_() : -1;
             Reply("RD_TEST_OK sensor mm=" + std::to_string(mm));
         } else {
-            Reply("RD_TEST_ERR " + module + " firmware nay chua co bai kiem tra cho module nay");
+            Reply("RD_TEST_ERR " + module + " unsupported");
         }
     }
 
@@ -297,6 +309,17 @@ private:
         for (const char* cap : {"cfg", "wifi", "test"}) {
             cJSON_AddItemToArray(caps, cJSON_CreateString(cap));
         }
+        cJSON* tests = cJSON_AddArrayToObject(root, "tests");
+        for (const char* module : {"speaker", "mic", "sensor"}) {
+            cJSON_AddItemToArray(tests, cJSON_CreateString(module));
+        }
+        if (lcd_test_) {
+            cJSON_AddItemToArray(tests, cJSON_CreateString("lcd"));
+        }
+        // Device state (idle, listening, activating, wifi_configuring...) and whether a Wi-Fi is saved
+        cJSON_AddStringToObject(root, "state",
+                                DeviceStateMachine::GetStateName(Application::GetInstance().GetDeviceState()));
+        cJSON_AddBoolToObject(root, "wifi_saved", !SsidManager::GetInstance().GetSsidList().empty());
         char* printed = cJSON_PrintUnformatted(root);
         Reply(std::string("RD_INFO ") + (printed ? printed : "{}"));
         cJSON_free(printed);

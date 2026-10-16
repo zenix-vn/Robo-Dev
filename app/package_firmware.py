@@ -14,8 +14,8 @@ import unicodedata
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(os.path.dirname(ROOT), "firmware", "xiaozhi-esp32", "build")
-FILES = {  # vai trò -> (file trong build/, tên file trong gói)
-    "full": ("merged-binary.bin", "merged-binary.bin"),
+FILES = {  # vai trò -> (file trong build/, tên file trong gói; "{slug}" = tên gói, ví dụ robo-dev-1.0.0)
+    "full": ("merged-binary.bin", "{slug}.bin"),
     "app": ("xiaozhi.bin", "xiaozhi.bin"),
     "otadata": ("ota_data_initial.bin", "ota_data_initial.bin"),
     "partition_table": (os.path.join("partition_table", "partition-table.bin"), "partition-table.bin"),
@@ -41,12 +41,16 @@ def main():
 
     if not os.path.isfile(os.path.join(BUILD, "xiaozhi.bin")):
         sys.exit(f"Chưa có bản build trong {BUILD}. Hãy build firmware trước (firmware/build.ps1).")
-    folder = os.path.join(ROOT, "firmware", slug(f"{args.name}-{args.version}"))
-    os.makedirs(folder, exist_ok=True)
+    name = slug(f"{args.name}-{args.version}")
+    folder = os.path.join(ROOT, "firmware", name)
+    if os.path.isdir(folder):
+        shutil.rmtree(folder)            # tạo lại sạch, không để sót file của lần đóng gói trước
+    os.makedirs(folder)
     files = {}
     for role, (src, dst) in FILES.items():
         path = os.path.join(BUILD, src)
         if os.path.isfile(path):
+            dst = dst.format(slug=name)
             shutil.copyfile(path, os.path.join(folder, dst))
             files[role] = dst
     manifest = {"name": args.name, "version": args.version, "variant": args.variant, "chip": "esp32s3",
@@ -54,7 +58,9 @@ def main():
     with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     print("Đã tạo gói:", folder)
-    print("Có:", ", ".join(files))
+    print("Có:", ", ".join(f"{role}={dst}" for role, dst in files.items()))
+    if "full" in files:
+        print(f"File nạp đầy đủ (ghi từ 0x0): {files['full']}")
     if "full" not in files:
         print("Chú ý: thiếu merged-binary.bin nên gói này chỉ nạp nhanh được.")
 

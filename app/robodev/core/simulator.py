@@ -63,6 +63,7 @@ class DemoSession(link.Session):
         self._queue = []          # [(thời điểm, dòng)]
         self._t = time.time()
         self._booted = False
+        self.boot = link.BootLog()
 
     def close(self):
         pass
@@ -82,6 +83,7 @@ class DemoSession(link.Session):
         due = [line for t, line in self._queue if t <= now]
         self._queue = [(t, line) for t, line in self._queue if t > now]
         for line in due:
+            self.boot.feed(line)
             self.on_line(line)
         return due
 
@@ -155,7 +157,10 @@ class DemoSession(link.Session):
                                     "chip": "esp32s3", "flash_mb": 16, "psram_mb": 8, "sensor": "vl6180x",
                                     "wifi": bool(DEVICE.wifi), "activated": DEVICE.linked,
                                     "hw_saved": bool(DEVICE.hw), "cfg_saved": bool(DEVICE.cfg), "module_errors": [],
-                                    "caps": list(CAPS)}))
+                                    "caps": list(CAPS),
+                                    "tests": ["speaker", "mic", "sensor", "lcd", "motors", "led", "button"],
+                                    "state": "idle" if DEVICE.linked else "wifi_configuring" if not DEVICE.wifi else "activating",
+                                    "wifi_saved": bool(DEVICE.wifi)}))
         elif name == "CFG_GET":
             cfg = profile.firmware_defaults()
             if DEVICE.cfg:
@@ -221,4 +226,4 @@ class DemoSession(link.Session):
         elif module in ("speaker", "lcd", "motors", "led"):
             r(f"TEST_OK {module}", 0.6)
         else:
-            r(f"TEST_ERR {module} không có module này")
+            r(f"TEST_ERR {module} unsupported")

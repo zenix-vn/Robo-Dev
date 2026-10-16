@@ -109,6 +109,16 @@ class AppState(QObject):
             self.version = version
             self.device_changed.emit()
 
+    def set_info(self, info):
+        if info != self.info:
+            self.info = info
+            self.device_changed.emit()
+
+    @property
+    def tests(self):
+        """Module có bài kiểm tra trên firmware (None = chưa biết)."""
+        return set(self.info["tests"]) if self.info and "tests" in self.info else None
+
     def set_caps(self, caps):
         caps = set(caps)
         if caps != self.caps:
@@ -160,7 +170,10 @@ class JobRunner(QObject):
     def _emit_for(self, job_id):
         def emit(kind, *args):
             # Tín hiệu Qt tự chuyển sự kiện từ luồng nền sang luồng giao diện
-            self.event.emit(job_id, (kind, *args))
+            try:
+                self.event.emit(job_id, (kind, *args))
+            except RuntimeError:
+                return              # ứng dụng đang thoát, giao diện đã bị hủy
             if kind == "done":
                 self.finished.emit(job_id, bool(args[0]), str(args[1]) if len(args) > 1 else "")
         return emit

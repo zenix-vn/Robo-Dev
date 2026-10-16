@@ -15,12 +15,20 @@ LEVEL = re.compile(r"^([EWID]) \(\d+\)")
 LEVEL_COLORS = {"E": "#F97066", "W": "#FDB022", "I": "#D0D5DD", "D": "#98A2B3"}
 
 # module -> (tiêu đề, mô tả, các bước [(mã bước, nhãn nút)], câu hỏi xác nhận)
+# Câu hỏi là chuỗi (Đúng/Không) hoặc danh sách lựa chọn [(nhãn, mã gợi ý sửa; None = đạt)].
+LCD_CHOICES = [
+    ("Đúng hết", None),
+    ("Màu bị đảo (xanh ngọc, tím, vàng; viền đen)", "lcd_invert"),
+    ("Đỏ và xanh dương đổi chỗ", "lcd_rgb"),
+    ("Thiếu viền trắng hoặc hình bị lệch", "lcd_offset"),
+    ("Không hiện gì / màn hình trắng", "lcd_blank"),
+]
 TESTS = {
     "speaker": ("Loa", "Phát một tiếng bíp ngắn.", [("tone", "Phát âm thử")], "Bạn có nghe thấy tiếng bíp không?"),
     "mic": ("Microphone", "Đo mức âm thanh trong 1 giây. Hãy vỗ tay hoặc nói to khi đang đo.",
             [("level", "Đo mức âm")], None),
-    "lcd": ("Màn hình", "Hiện dải màu đỏ, xanh lá, xanh dương và khung viền.", [("colors", "Hiện màu thử")],
-            "Màn hình có hiện đúng thứ tự đỏ, xanh lá, xanh dương không?"),
+    "lcd": ("Màn hình", "Hiện 5 giây: ba dải đỏ, xanh lá, xanh dương (trái sang phải) trong khung viền trắng.",
+            [("colors", "Hiện hình thử")], LCD_CHOICES),
     "sensor": ("Cảm biến khoảng cách", "Đọc khoảng cách. Đưa tay lại gần cảm biến rồi đo lại.", [("read", "Đo khoảng cách")],
                None),
     "motors": ("Động cơ", "Quay từng bánh chậm trong 1 giây. Kê robot lên để bánh không chạm đất.",
@@ -65,7 +73,18 @@ class TestCard(Card):
         self.detail.hide()
         self.add(self.detail)
         self.question = None
-        if question:
+        if isinstance(question, list):
+            self.question = QWidget()
+            q = vbox(label("Bạn thấy gì trên màn hình?", "h3"), spacing=6)
+            for text, key in question:
+                btn = button(text, None, "check" if key is None else None, size="sm",
+                             on_click=lambda _=False, k=key: self.answer_choice(k))
+                btn.setStyleSheet("text-align: left;")
+                q.addWidget(btn)
+            self.question.setLayout(q)
+            self.question.hide()
+            self.add(self.question)
+        elif question:
             self.question = QWidget()
             q = vbox(label(question, "h3", wrap=True),
                      hbox(button("Đúng", None, "check", size="sm", on_click=lambda: self.answer(True)),
@@ -78,12 +97,14 @@ class TestCard(Card):
         self.fix.hide()
         self.add(self.fix)
 
+    IDLE_CHIPS = ("Chưa kiểm tra", "Không khả dụng", "Đang tắt", "Chưa hỗ trợ")
+
     def set_enabled_state(self, enabled, reason=""):
         for btn in self.buttons:
             btn.setEnabled(enabled)
-        if reason and self.chip.text() in ("Chưa kiểm tra", "Không khả dụng", "Đang tắt"):
+        if reason and self.chip.text() in self.IDLE_CHIPS:
             self.chip.set(reason, "neutral")
-        elif not reason and self.chip.text() in ("Không khả dụng", "Đang tắt"):
+        elif not reason and self.chip.text() in self.IDLE_CHIPS[1:]:
             self.chip.set("Chưa kiểm tra", "neutral")
 
     def running(self):
@@ -93,26 +114,68 @@ class TestCard(Card):
             self.question.hide()
 
     def result(self, ok, text):
-        self.detail.setText(text)
-        self.detail.setVisible(bool(text))
-        if self.level is not None:
-            m = re.search(r"avg_abs=(\d+)", text)
-            if m:
-                self.level.set(min(1.0, int(m.group(1)) / 3000))
+        """Đánh giá trả lời của firmware (RD_TEST_OK/ERR) thành kết luận dễ hiểu."""
+        self.fix.hide()
         if not ok:
-            self.chip.set("Lỗi", "error")
-            self.show_fix(None)
+            code = text.split()[0] if text else ""
+            if code == "unsupported":
+                self.set_detail("Bản firmware trên mạch chưa có bài kiểm tra cho module này.")
+                self.chip.set("Chưa hỗ trợ", "neutral")
+            elif code == "no_sensor":
+                self.set_detail("Cảm biến không trả lời trên I2C.")
+                self.chip.set("Không thấy cảm biến", "error")
+                self.show_fix("no_sensor")
+            else:
+                self.set_detail(text)
+                self.chip.set("Lỗi", "error")
+                self.show_fix(None)
             return
-        if self.question:
+        if self.module == "mic":
+            self.judge_mic(text)
+        elif self.module == "sensor":
+            self.judge_sensor(text)
+        elif self.question:
+            self.set_detail("")
             self.chip.set("Chờ xác nhận", "warning")
             self.question.show()
         else:
+            self.set_detail(text)
             self.chip.set("Đạt", "ok")
-            if self.module == "mic" and "avg_abs=" in text:
-                m = re.search(r"avg_abs=(\d+)", text)
-                if m and int(m.group(1)) < 50:
-                    self.chip.set("Quá nhỏ", "warning")
-                    self.show_fix("mic_quiet")
+
+    def set_detail(self, text):
+        self.detail.setText(text)
+        self.detail.setVisible(bool(text))
+
+    def judge_mic(self, text):
+        values = {k: int(v) for k, v in re.findall(r"(\w+)=(-?\d+)", text)}
+        avg, lo, hi = values.get("avg_abs", 0), values.get("min", 0), values.get("max", 0)
+        if self.level is not None:
+            self.level.set(min(1.0, avg / 3000))
+        if lo <= -32000 and hi >= 32000 and avg > 8000:
+            self.set_detail(f"Mức trung bình {avg}, tín hiệu chạm trần ({lo} đến {hi}).")
+            self.chip.set("Bị bão hòa", "warning")
+            self.show_fix("mic_loud")
+        elif avg < 50:
+            self.set_detail(f"Mức trung bình {avg}: gần như không có tín hiệu.")
+            self.chip.set("Quá nhỏ", "warning")
+            self.show_fix("mic_quiet")
+        else:
+            self.set_detail(f"Mức âm trung bình {avg}. Vỗ tay rồi đo lại: con số phải tăng rõ.")
+            self.chip.set("Đạt", "ok")
+
+    def judge_sensor(self, text):
+        m = re.search(r"mm=(-?\d+)", text)
+        mm = int(m.group(1)) if m else None
+        if mm is None:
+            self.set_detail(text)
+            self.chip.set("Đạt", "ok")
+        elif mm < 0:
+            self.set_detail("Cảm biến trả lời nhưng không thấy vật nào trong tầm đo.")
+            self.chip.set("Không thấy vật", "warning")
+            self.show_fix("sensor_far")
+        else:
+            self.set_detail(f"Khoảng cách tới vật phía trước: {mm} mm.")
+            self.chip.set("Đạt", "ok")
 
     def answer(self, yes):
         self.question.hide()
@@ -123,18 +186,46 @@ class TestCard(Card):
             self.chip.set("Chưa đúng", "error")
             self.show_fix(self.module)
 
+    def setting_tip(self, app_setting, define):
+        """Cách sửa một thông số màn hình: qua Robo Dev nếu firmware đổi được lúc chạy, nếu không thì sửa config.h."""
+        if self.page.state.supports("hw"):
+            return (f"Đổi {app_setting} ở thẻ Màn hình (bước Nối chân, bật chế độ Nâng cao), bấm Áp dụng rồi "
+                    "kiểm tra lại.")
+        return (f"Bản firmware trên mạch chưa đổi được thông số màn hình lúc chạy: sửa <b>{define}</b> trong "
+                "<code>firmware/robo-dev-s3/config.h</code>, build và nạp lại (README mục 2).")
+
+    def answer_choice(self, key):
+        self.question.hide()
+        if key is None:
+            self.chip.set("Đạt", "ok")
+            self.fix.hide()
+        else:
+            self.chip.set("Chưa đúng", "error")
+            self.show_fix(key)
+
     def show_fix(self, key):
         tips = {
             None: "Mạch báo lỗi. Kiểm tra lại dây của module này ở bước Nối chân và đối chiếu với log bên phải.",
             "speaker": "Kiểm tra dây LRC, BCLK, DIN và nguồn Vin của MAX98357A. Loa: đỏ vào +, đen vào −.",
             "lcd": "Nếu màu bị đảo, bật/tắt “Đảo màu” ở thẻ Màn hình (bước Nối chân, chế độ Nâng cao). "
                    "Nếu không hiện gì, kiểm tra dây SCL, SDA, DC, RST.",
+            "lcd_invert": self.setting_tip("“Đảo màu”", "DISPLAY_INVERT_COLOR (true ↔ false)"),
+            "lcd_rgb": self.setting_tip("thứ tự màu RGB/BGR", "DISPLAY_RGB_ORDER (LCD_RGB_ELEMENT_ORDER_RGB ↔ _BGR)"),
+            "lcd_offset": self.setting_tip("“Lệch X/Y”, “Lật ngang/dọc”",
+                                           "DISPLAY_OFFSET_X / DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X / _Y"),
+            "lcd_blank": "Kiểm tra dây SCL, SDA, DC, RST đúng chân ở bước Nối chân; VCC và BL nối 3V3, GND nối GND. "
+                         "Màn hình chỉ trắng thường là sai dây DC/RST hoặc tốc độ SPI quá cao với dây dài.",
             "motors": "Bánh quay ngược chiều → bật “Đảo chiều bánh” ở bước Tính năng. Bánh trái/phải bị đổi → bật "
                       "“Đổi bánh trái ↔ phải”.",
             "led": "Đèn sai màu → đổi “Thứ tự màu” (GRB/RGB) ở thẻ Đèn LED, bước Nối chân (chế độ Nâng cao).",
             "mic_quiet": "Mức âm rất nhỏ: kiểm tra chân L/R của mic phải nối 3V3, và dây WS, SCK, SD.",
+            "mic_loud": "Tín hiệu mic chạm trần: thường do nhiễu (dây mic dài, chung nguồn với động cơ) hoặc sai dây "
+                        "WS/SCK. Thử đo lại khi phòng yên lặng; nếu vẫn chạm trần, kiểm tra dây và nguồn 3V3 của mic.",
+            "no_sensor": "Kiểm tra dây SDA, SCL (thử đổi chỗ hai dây), nguồn VIN 3V3 và GND của cảm biến.",
+            "sensor_far": "Đưa tay cách cảm biến 5-10 cm rồi bấm đo lại. VL6180X chỉ đo được tới khoảng 20 cm.",
         }
         self.fix.set(tips.get(key, tips[None]), "info")
+        self.fix.text.setTextFormat(Qt.RichText)
         self.fix.show()
 
 
@@ -240,10 +331,15 @@ class TestPage(Page):
         self.reset_btn.setEnabled(on)
         self.cmd.setEnabled(on)
         hw = st.project["hw"]
+        tests = st.tests
         for module, card in self.cards.items():
             enabled_module = hw.get(module, {}).get("enabled", True)
             if not enabled_module:
                 card.set_enabled_state(False, "Đang tắt")
+            elif tests is not None and module not in tests:
+                card.set_enabled_state(False, "Chưa hỗ trợ")
+                for btn in card.buttons:
+                    btn.setToolTip("Bản firmware trên mạch chưa có bài kiểm tra cho module này")
             elif not on:
                 card.set_enabled_state(False, "Không khả dụng" if not st.port else "")
                 for btn in card.buttons:
