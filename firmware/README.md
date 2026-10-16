@@ -45,14 +45,19 @@ idf.py -C xiaozhi-esp32 -p COM4 monitor      # xem log, thoát bằng Ctrl + ]
 
 ## Sửa code
 
+> **Quy tắc:** `xiaozhi-esp32/` là repo của người khác: **không sửa**, và không bao giờ commit vào đó. Nếu buộc phải sửa, phần sửa phải được lưu thành patch trong `patches/` (thuộc repo Robo Dev) thì mới commit được. Sửa mà chưa lưu thì sẽ mất khi `-Reset` hoặc khi cập nhật thư viện.
+
 - **Sửa board của robot** (gần như mọi việc): sửa trong `robo-dev-s3/`, chạy lại `.\build.ps1`.
 - **Buộc phải sửa thư viện** (hiếm):
   1. Sửa file trong `xiaozhi-esp32/` như bình thường.
-  2. Lưu phần sửa thành patch mới, ví dụ:
-     `git -C xiaozhi-esp32 diff -- main/duong/dan/file.cc > patches\06-ten-ngan.patch`
-  3. Ghi vào bảng patch ở trên. Từ giờ `build.ps1` sẽ tự áp patch đó.
+  2. Lưu phần sửa vào patch:
+     ```powershell
+     .\build.ps1 -SavePatches                     # file đã có trong patch cũ: cập nhật patch đó
+     .\build.ps1 -SavePatches -NewName ten-ngan   # có file mới sửa: tạo thêm patch NN-ten-ngan.patch
+     ```
+  3. Ghi patch mới (nếu có) vào bảng ở trên, rồi commit thư mục `patches/`.
 
-  Nếu file đó đã có trong một patch cũ, sửa lại chính patch cũ: chạy `git -C xiaozhi-esp32 diff -- <các file của patch đó>` rồi ghi đè file patch.
+  Mỗi lần chạy, `build.ps1` tự kiểm tra và **cảnh báo** nếu trong `xiaozhi-esp32/` còn chỗ sửa chưa lưu vào patch. `-Reset` cũng từ chối chạy khi còn chỗ chưa lưu.
 - Muốn trả thư viện về nguyên gốc: `.\build.ps1 -Reset`.
 
 ## Cập nhật thư viện xiaozhi-esp32 lên bản mới

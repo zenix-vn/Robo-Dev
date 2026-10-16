@@ -42,4 +42,5 @@ Từ 16/10/2026 mọi thứ nằm trong `Robo-Dev/`. Các thư mục thử nghi�
 
 - Giữ patch gọn, đúng phạm vi yêu cầu.
 - Tên dự án và robot thống nhất là Robo Dev / Robo; không dùng tên của các dự án thử nghiệm trước đây. Lệnh COM dùng tiền tố `RD_`; khóa NVS là API lâu dài, đổi cấu trúc phải tăng `schema` và viết chuyển đổi.
+- Code của repo khác (`firmware/xiaozhi-esp32/` và mọi submodule): không sửa. Nếu buộc phải sửa, lưu ngay thành patch bằng `firmware/build.ps1 -SavePatches [-NewName ten]` để phần sửa nằm trong repo Robo Dev và commit được; không commit vào submodule.
 - Không push, force-push hay đổi lịch sử khi người dùng chưa yêu cầu.
