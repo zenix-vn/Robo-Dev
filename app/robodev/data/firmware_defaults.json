@@ -1,0 +1,242 @@
+{
+ "version": 1,
+ "features": {
+  "motors": true,
+  "obstacle_stop": true,
+  "obstacle_report": true,
+  "emotion_motion": true,
+  "led": true,
+  "hide_subtitle": true
+ },
+ "motors": {
+  "default_speed": 70,
+  "slow_speed": 45,
+  "invert_left": false,
+  "invert_right": false,
+  "swap_sides": false
+ },
+ "obstacle": {
+  "stop_distance_mm": 150,
+  "back_off_ms": 500,
+  "report_interval_ms": 20000,
+  "report_text": "[Voi vừa chạm phải vật cản phía trước và đã lùi lại]"
+ },
+ "emotion_motion": {
+  "cooldown_ms": 4000,
+  "crying": {
+   "action": "backward",
+   "speed": 45,
+   "ms": 1000
+  },
+  "funny": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "happy": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "kissy": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "laughing": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "loving": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "sad": {
+   "action": "backward",
+   "speed": 45,
+   "ms": 1000
+  },
+  "shocked": {
+   "action": "backward",
+   "speed": 70,
+   "ms": 250
+  },
+  "silly": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  },
+  "surprised": {
+   "action": "backward",
+   "speed": 70,
+   "ms": 250
+  },
+  "winking": {
+   "action": "spin_right",
+   "speed": 70,
+   "ms": 1500
+  }
+ },
+ "wander": {
+  "interval_min_ms": 8000,
+  "interval_max_ms": 20000,
+  "forward_speed": 55,
+  "turn_speed": 60,
+  "clear_distance_mm": 400
+ },
+ "led": {
+  "brightness": 6,
+  "idle": [
+   255,
+   145,
+   36
+  ],
+  "listening": [
+   0,
+   255,
+   255
+  ],
+  "speaking": [
+   255,
+   96,
+   0
+  ],
+  "connecting": [
+   0,
+   0,
+   255
+  ],
+  "starting": [
+   0,
+   0,
+   255
+  ],
+  "activating": [
+   0,
+   255,
+   0
+  ],
+  "upgrading": [
+   0,
+   255,
+   0
+  ],
+  "moods": {
+   "angry": [
+    255,
+    0,
+    0
+   ],
+   "confident": [
+    0,
+    255,
+    128
+   ],
+   "confused": [
+    128,
+    0,
+    192
+   ],
+   "cool": [
+    0,
+    255,
+    128
+   ],
+   "crying": [
+    0,
+    48,
+    255
+   ],
+   "embarrassed": [
+    255,
+    32,
+    96
+   ],
+   "funny": [
+    255,
+    191,
+    0
+   ],
+   "happy": [
+    255,
+    191,
+    0
+   ],
+   "kissy": [
+    255,
+    32,
+    96
+   ],
+   "laughing": [
+    255,
+    191,
+    0
+   ],
+   "loving": [
+    255,
+    32,
+    96
+   ],
+   "relaxed": [
+    0,
+    255,
+    128
+   ],
+   "sad": [
+    0,
+    48,
+    255
+   ],
+   "shocked": [
+    255,
+    255,
+    255
+   ],
+   "silly": [
+    255,
+    191,
+    0
+   ],
+   "surprised": [
+    255,
+    255,
+    255
+   ],
+   "thinking": [
+    128,
+    0,
+    192
+   ],
+   "winking": [
+    255,
+    191,
+    0
+   ]
+  }
+ },
+ "mcp_tools": {
+  "backward": {
+   "enabled": true
+  },
+  "forward": {
+   "enabled": true
+  },
+  "get_distance": {
+   "enabled": true
+  },
+  "set_wander": {
+   "enabled": true
+  },
+  "stop": {
+   "enabled": true
+  },
+  "turn_left": {
+   "enabled": true
+  },
+  "turn_right": {
+   "enabled": true
+  }
+ }
+}

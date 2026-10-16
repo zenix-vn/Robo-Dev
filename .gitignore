@@ -12,6 +12,8 @@ releases/
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
+app/build-pyinstaller/
 
 # Editors / OS
 .vscode/

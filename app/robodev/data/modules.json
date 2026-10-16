@@ -1,0 +1,232 @@
+[
+  {
+    "key": "mic",
+    "name": "Microphone",
+    "short": "Mic",
+    "part": "INMP441 (I2S)",
+    "photo": "mic.jpg",
+    "color": "#0EA5E9",
+    "optional": true,
+    "summary": "Thu giọng nói để gửi lên AI.",
+    "signals": [
+      {
+        "key": "ws",
+        "label": "WS"
+      },
+      {
+        "key": "sck",
+        "label": "SCK"
+      },
+      {
+        "key": "sd",
+        "label": "SD"
+      }
+    ],
+    "defaults": {
+      "ws": 4,
+      "sck": 5,
+      "sd": 6
+    },
+    "power": "VDD → 3V3, GND → GND, L/R → 3V3",
+    "notes": "Firmware đọc kênh phải: chân L/R phải nối 3V3, không để hở."
+  },
+  {
+    "key": "speaker",
+    "name": "Loa",
+    "short": "Loa",
+    "part": "Khuếch đại MAX98357A (I2S)",
+    "photo": "amp.jpg",
+    "color": "#8B5CF6",
+    "optional": true,
+    "summary": "Phát giọng nói của AI ra loa.",
+    "signals": [
+      {
+        "key": "lrc",
+        "label": "LRC"
+      },
+      {
+        "key": "bclk",
+        "label": "BCLK"
+      },
+      {
+        "key": "din",
+        "label": "DIN"
+      }
+    ],
+    "defaults": {
+      "lrc": 16,
+      "bclk": 15,
+      "din": 7
+    },
+    "power": "Vin → 3V3 (hoặc 5V cho tiếng to hơn), GND → GND",
+    "notes": "GAIN và SD để trống. Loa: dây đỏ vào +, dây đen vào −."
+  },
+  {
+    "key": "lcd",
+    "name": "Màn hình",
+    "short": "LCD",
+    "part": "LCD ST7789 1,54\" 240x240 (SPI)",
+    "photo": "lcd.jpg",
+    "color": "#F59E0B",
+    "optional": true,
+    "summary": "Hiển thị khuôn mặt và trạng thái.",
+    "signals": [
+      {
+        "key": "scl",
+        "label": "SCL"
+      },
+      {
+        "key": "sda",
+        "label": "SDA"
+      },
+      {
+        "key": "dc",
+        "label": "DC"
+      },
+      {
+        "key": "rst",
+        "label": "RST"
+      },
+      {
+        "key": "cs",
+        "label": "CS",
+        "optional": true
+      }
+    ],
+    "defaults": {
+      "scl": 2,
+      "sda": 1,
+      "dc": 43,
+      "rst": 44,
+      "cs": -1
+    },
+    "settings": {
+      "spi_mode": 3,
+      "clock_mhz": 10,
+      "invert": true,
+      "mirror_x": false,
+      "mirror_y": false,
+      "swap_xy": false,
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "power": "VCC → 3V3, GND → GND, BL → 3V3",
+    "notes": "Màn hình 7 chân không có CS: nối CS xuống GND (hoặc để \"Không dùng\")."
+  },
+  {
+    "key": "sensor",
+    "name": "Cảm biến khoảng cách",
+    "short": "Cảm biến",
+    "part": "VL53L0X hoặc VL6180X (I2C)",
+    "photo": "sensor.jpg",
+    "color": "#10B981",
+    "optional": true,
+    "summary": "Đo vật cản phía trước để robot tự dừng.",
+    "signals": [
+      {
+        "key": "sda",
+        "label": "SDA"
+      },
+      {
+        "key": "scl",
+        "label": "SCL"
+      }
+    ],
+    "defaults": {
+      "sda": 12,
+      "scl": 13
+    },
+    "settings": {
+      "type": "auto"
+    },
+    "power": "VIN → 3V3, GND → GND",
+    "notes": "INT và SHUT để trống. Firmware tự nhận loại cảm biến."
+  },
+  {
+    "key": "motors",
+    "name": "Động cơ",
+    "short": "Động cơ",
+    "part": "Mạch cầu H 2 kênh (IN1-IN4)",
+    "photo": null,
+    "color": "#EF4444",
+    "optional": true,
+    "summary": "Hai bánh xe để robot di chuyển.",
+    "signals": [
+      {
+        "key": "in1",
+        "label": "IN1"
+      },
+      {
+        "key": "in2",
+        "label": "IN2"
+      },
+      {
+        "key": "in3",
+        "label": "IN3"
+      },
+      {
+        "key": "in4",
+        "label": "IN4"
+      }
+    ],
+    "defaults": {
+      "in1": 17,
+      "in2": 18,
+      "in3": 3,
+      "in4": 14
+    },
+    "settings": {
+      "invert_left": false,
+      "invert_right": false,
+      "swap_sides": false
+    },
+    "power": "Nguồn + → 5V, − → GND; OUT A, OUT B → hai động cơ",
+    "notes": "IN1/IN2 điều khiển bánh trái, IN3/IN4 bánh phải."
+  },
+  {
+    "key": "led",
+    "name": "Đèn LED RGB",
+    "short": "LED",
+    "part": "WS2812 trên mạch",
+    "photo": "esp32.jpg",
+    "color": "#EC4899",
+    "optional": true,
+    "summary": "Đổi màu theo trạng thái và cảm xúc.",
+    "signals": [
+      {
+        "key": "pin",
+        "label": "DIN"
+      }
+    ],
+    "defaults": {
+      "pin": 48
+    },
+    "settings": {
+      "count": 1,
+      "order": "GRB"
+    },
+    "power": "Có sẵn trên mạch",
+    "notes": "Devkit nối sẵn đèn vào GPIO48."
+  },
+  {
+    "key": "button",
+    "name": "Nút BOOT",
+    "short": "Nút",
+    "part": "Nút trên mạch",
+    "photo": "esp32.jpg",
+    "color": "#64748B",
+    "optional": false,
+    "summary": "Bấm để bắt đầu hoặc kết thúc hội thoại.",
+    "signals": [
+      {
+        "key": "pin",
+        "label": "BOOT"
+      }
+    ],
+    "defaults": {
+      "pin": 0
+    },
+    "power": "Có sẵn trên mạch",
+    "notes": "Nút có sẵn trên mạch, nối với GPIO0."
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "id": "esp32s3-n16r8-dual-usbc",
+  "name": "ESP32-S3-N16R8 (2 cổng USB-C)",
+  "chip": "esp32s3",
+  "flash_mb": 16,
+  "psram": "octal 8 MB",
+  "photo": "esp32.jpg",
+  "header": {
+    "left": ["3V3", "3V3", "RST", "4", "5", "6", "7", "15", "16", "17", "18", "8", "3", "46", "9", "10", "11", "12", "13", "14", "5V", "GND"],
+    "right": ["GND", "43", "44", "1", "2", "42", "41", "40", "39", "38", "37", "36", "35", "0", "45", "48", "47", "21", "20", "19", "GND", "GND"]
+  },
+  "labels": { "43": "TX", "44": "RX" },
+  "rules": [
+    { "gpios": [26, 27, 28, 29, 30, 31, 32], "level": "error",
+      "text": "GPIO{gpio} nối với bộ nhớ flash bên trong module, không dùng được." },
+    { "gpios": [33, 34, 35, 36, 37], "level": "error",
+      "text": "GPIO{gpio} dành cho PSRAM 8 MB (octal) của chip N16R8, không dùng được." },
+    { "gpios": [19, 20], "level": "error", "variant": "usb",
+      "text": "GPIO{gpio} là dây D-/D+ của cổng USB native. Firmware đang dùng cổng này để đọc log, nên không thể nối thiết bị khác." },
+    { "gpios": [19, 20], "level": "warning", "variant": "uart",
+      "text": "GPIO{gpio} là dây USB native. Dùng chân này thì cổng USB-C native sẽ không hoạt động." },
+    { "gpios": [43, 44], "level": "error", "variant": "uart",
+      "text": "GPIO{gpio} là chân TX/RX của cổng COM. Firmware đang dùng cổng này để đọc log, nên không thể nối thiết bị khác." },
+    { "gpios": [43, 44], "level": "warning", "variant": "usb",
+      "text": "GPIO{gpio} là chân TX/RX của cổng COM. Vẫn nạp được qua cổng COM, nhưng cổng này sẽ không còn đọc được log." },
+    { "gpios": [0], "level": "error", "except": ["button"],
+      "text": "GPIO0 nối với nút BOOT và quyết định chế độ nạp khi khởi động. Chỉ dùng cho nút BOOT." },
+    { "gpios": [3, 45, 46], "level": "warning",
+      "text": "GPIO{gpio} là chân strapping: mức điện lúc bật nguồn ảnh hưởng tới cách chip khởi động. Nếu mạch không khởi động, hãy chuyển thiết bị sang chân khác." },
+    { "gpios": [48], "level": "warning", "except": ["led"],
+      "text": "GPIO48 đã nối sẵn với đèn LED RGB trên mạch. Dùng cho thiết bị khác thì đèn sẽ nhấp nháy theo." }
+  ]
+}

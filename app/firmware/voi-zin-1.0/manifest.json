@@ -1,0 +1,16 @@
+{
+  "name": "Voi (Zin 1.0)",
+  "version": "Zin 1.0",
+  "protocol": "VOI",
+  "variant": "usb",
+  "chip": "esp32s3",
+  "flash_mb": 16,
+  "notes": "Firmware của dự án thử nghiệm Voi Studio. Chân GPIO cố định theo config.h của board ai-box-robot-s3cam; chưa hỗ trợ đổi chân và lệnh tùy chỉnh.",
+  "files": {
+    "full": "voi-firmware.bin",
+    "app": "xiaozhi.bin",
+    "otadata": "ota_data_initial.bin",
+    "partition_table": "partition-table.bin",
+    "assets": "generated_assets.bin"
+  }
+}

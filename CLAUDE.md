@@ -13,7 +13,7 @@ Robo Dev: phần mềm Python (Windows) giúp người mới học ESP32 nạp, 
 ## Cấu trúc (dự kiến, xem document.md mục 10)
 
 - `firmware/`: dự án ESP-IDF copy từ xiaozhi-esp32; board mới `main/boards/robo-dev-s3/`.
-- `app/robodev/`: ứng dụng Python (Tkinter, esptool, pyserial, Pillow), đóng gói PyInstaller.
+- `app/robodev/`: ứng dụng Python (PySide6, esptool, pyserial), đóng gói PyInstaller. `core/` không phụ thuộc giao diện; `ui/` là PySide6 (theme/màu chỉ lấy từ `ui/theme.py`).
 - `docs/`: phần cứng, sơ đồ nối dây ([docs/hardware.md](docs/hardware.md)).
 
 ## Phần cứng v1
@@ -30,6 +30,8 @@ Robo Dev phải tự chứa: code cần dùng được **copy vào** `Robo-Dev/`
 
 ## Build
 
+- App: `cd app; .\.venv\Scripts\python.exe -m robodev --demo` (mạch mô phỏng, không cần phần cứng); test: `.\.venv\Scripts\python.exe -m pytest`; lint: `-m pyflakes robodev tests`.
+- Kiểm tra giao diện bằng mắt: `-m robodev --demo --shot <thư mục>` chụp ảnh 6 trang rồi đọc ảnh.
 - Firmware: ESP-IDF v6.x, target `esp32s3`. ESP-IDF không chạy trong Git Bash/MSYS; dùng PowerShell với `export.ps1`.
 - Không commit `build/`, `managed_components/`, `sdkconfig`, `releases/`, `*.bin`.
 

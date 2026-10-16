@@ -1,0 +1,9 @@
+[project]
+name = "robodev"
+version = "0.1.0"
+description = "Robo Dev: nạp, cấu hình, kiểm tra và tùy biến firmware robot ESP32-S3"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
