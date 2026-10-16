@@ -13,7 +13,7 @@ class DemoDevice:
     def __init__(self):
         self.lock = threading.Lock()
         self.flashed = True
-        self.version = "0.1.0-demo"
+        self.version = "1.0.0-demo"
         self.hw = None
         self.cfg = None
         self.wifi = None
@@ -21,6 +21,8 @@ class DemoDevice:
 
 
 DEVICE = DemoDevice()
+# Mạch mô phỏng đóng vai bản firmware Robo Dev đầy đủ (kể cả các khả năng firmware thật chưa có)
+CAPS = ("cfg", "wifi", "test", "hw", "commands")
 
 
 def check_chip(on_text, on_progress):
@@ -57,7 +59,6 @@ class DemoSession(link.Session):
     def __init__(self, port=link.DEMO_PORT, on_line=None, prefer_native=True):  # noqa: D401 - giữ chữ ký
         self.on_line = on_line or (lambda line: None)
         self.flash_port = self.port = link.DEMO_PORT
-        self.prefix = None
         self.buf = b""
         self._queue = []          # [(thời điểm, dòng)]
         self._t = time.time()
@@ -143,7 +144,7 @@ class DemoSession(link.Session):
         if not self._booted:
             return
         if not line.startswith("RD_"):
-            return          # mạch mô phỏng chạy firmware Robo Dev, không hiểu lệnh VOI_
+            return          # firmware Robo Dev chỉ hiểu lệnh RD_
         p = "RD"
         name, _, arg = line[len(p) + 1:].partition(" ")
         r = lambda text, d=0.05: self._reply(d, f"{p}_{text}")  # noqa: E731
@@ -153,7 +154,8 @@ class DemoSession(link.Session):
             r("INFO " + json.dumps({"board": "robo-dev-s3", "version": DEVICE.version, "variant": "usb",
                                     "chip": "esp32s3", "flash_mb": 16, "psram_mb": 8, "sensor": "vl6180x",
                                     "wifi": bool(DEVICE.wifi), "activated": DEVICE.linked,
-                                    "hw_saved": bool(DEVICE.hw), "cfg_saved": bool(DEVICE.cfg), "module_errors": []}))
+                                    "hw_saved": bool(DEVICE.hw), "cfg_saved": bool(DEVICE.cfg), "module_errors": [],
+                                    "caps": list(CAPS)}))
         elif name == "CFG_GET":
             cfg = profile.firmware_defaults()
             if DEVICE.cfg:

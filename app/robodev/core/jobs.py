@@ -2,9 +2,8 @@
 
 Mỗi việc nhận `emit(kind, *args)` để báo tiến độ và `stop` (threading.Event) để dừng giữa chừng.
 Sự kiện: log(text), progress(percent), step(key, state, text), code(code), check(result),
-firmware(prefix, version), test(module, step, ok, text), done(ok, message).
+firmware(version), caps(list), test(module, step, ok, text), done(ok, message).
 """
-import json
 import queue
 import re
 import time
@@ -43,7 +42,7 @@ def _boot(session, emit, stop, label="Đợi mạch khởi động"):
     emit("log", f"[Robo Dev] {label}...")
     version = session.ping(timeout=30, stop=stop)
     if version:
-        emit("firmware", session.prefix, version)
+        emit("firmware", version)
     return version
 
 
@@ -51,7 +50,7 @@ def _boot(session, emit, stop, label="Đợi mạch khởi động"):
 # Kiểm tra mạch
 # ----------------------------------------------------------------------------------------
 def job_check(port, emit, stop):
-    result = {"chip": None, "firmware": None, "info": None, "prefix": None}
+    result = {"chip": None, "firmware": None, "info": None}
     ok, message = _chip(port, emit, stop)
     result["chip"] = (ok, message)
     if not ok:
@@ -66,9 +65,10 @@ def job_check(port, emit, stop):
             emit("check", result)
             emit("done", True, "Mạch đúng loại nhưng chưa có firmware Robo Dev. Hãy nạp ở bước Nạp & kết nối.")
             return
-        result["prefix"] = session.prefix
         result["firmware"] = (True, version)
         result["info"] = session.info()
+        if result["info"] is not None:
+            emit("caps", result["info"].get("caps", []))
     emit("check", result)
     emit("done", True, "Đã kiểm tra xong mạch.")
 
@@ -77,11 +77,13 @@ def job_check(port, emit, stop):
 # Áp dụng hồ sơ
 # ----------------------------------------------------------------------------------------
 def _apply(session, project, emit, stop):
-    """Gửi hw (firmware Robo Dev) và cfg, rồi đọc lại để xác nhận. Trả về True nếu mạch dùng đúng hồ sơ."""
+    """Gửi hw (nếu firmware hỗ trợ) và cfg, rồi đọc lại để xác nhận. Trả về True nếu mạch dùng đúng hồ sơ."""
     _step(emit, "config", "run", "Đang gửi...")
-    rd = session.prefix == "RD"
+    info = session.info() or {}
+    caps = set(info.get("caps", []))
+    emit("caps", sorted(caps))
 
-    if rd:
+    if "hw" in caps:
         errors = [i for i in pins.validate(project["hw"]) if i.level == "error"]
         if errors:
             _step(emit, "config", "fail", errors[0].text)
@@ -98,10 +100,9 @@ def _apply(session, project, emit, stop):
                 _step(emit, "config", "fail", "Mạch không khởi động lại sau khi đổi chân")
                 return False
 
-    cfg = profile.cfg_payload(project, session.prefix)
+    cfg = profile.cfg_payload(project, caps)
     command = profile.compact(cfg)
     if cfg == {"version": 1}:
-        info = session.info() or {}
         if info.get("cfg_saved"):
             emit("log", "[Robo Dev] Hồ sơ là mặc định: xóa cấu hình cũ trong mạch.")
             session.clear("CFG")
@@ -125,11 +126,11 @@ def _apply(session, project, emit, stop):
     if actual is None:
         _step(emit, "config", "fail", "Không đọc lại được cấu hình từ mạch")
         return False
-    diffs = profile.differences(profile.expected_cfg(project, session.prefix), actual)
+    diffs = profile.differences(profile.expected_cfg(project, caps), actual)
     if diffs:
         _step(emit, "config", "fail", "Mạch báo khác hồ sơ: " + "; ".join(diffs[:3]))
         return False
-    note = "" if rd else " (firmware Voi: chân giữ cố định)"
+    note = "" if "hw" in caps else " (bản firmware này giữ chân cố định)"
     _step(emit, "config", "ok", "Mạch đang dùng đúng hồ sơ" + note)
     return True
 
@@ -243,24 +244,6 @@ def job_wifi(port, ssid, password, emit, stop):
 # ----------------------------------------------------------------------------------------
 TEST_TIMEOUT = {"button": 20.0, "mic": 8.0}
 
-# Firmware Voi cũ chỉ kiểm tra được một vài module
-LEGACY_TESTS = {"speaker": ("VOI_BEEP", "VOI_BEEP_OK"), "mic": ("VOI_MIC", "VOI_MIC_OK"),
-                "sensor": ("VOI_INFO", "VOI_INFO {")}
-
-
-def _legacy_result(module, line):
-    if module == "sensor":
-        try:
-            info = json.loads(line.split("VOI_INFO", 1)[1])
-        except ValueError:
-            return False, "Không đọc được trả lời"
-        return (True, "Cảm biến có trả lời trên I2C") if info.get("sensor") else (False, "Cảm biến không trả lời")
-    if module == "mic":
-        m = re.search(r"avg_abs=(\d+)", line)
-        return True, f"Mức âm thanh trung bình {m.group(1) if m else '?'}"
-    return True, "Mạch đã phát âm thanh"
-
-
 def job_monitor(port, commands, emit, stop):
     """Mở cổng log liên tục. `commands` là queue.Queue gồm chuỗi lệnh thô hoặc tuple:
     ("reset",), ("test", module, step), ("run", tên lệnh)."""
@@ -269,13 +252,12 @@ def job_monitor(port, commands, emit, stop):
     except Exception as e:  # noqa: BLE001
         emit("done", False, f"Không mở được {port}: {e}")
         return
-    pending = {}     # module -> (step, các chuỗi cần thấy, legacy, hạn chót)
+    pending = {}     # module -> (step, các chuỗi cần thấy, hạn chót)
     try:
         emit("log", f"[Robo Dev] Đang xem log trên {session.port}")
         if port == link.DEMO_PORT:
             session.reset()
         session.send("RD_PING")
-        session.send("VOI_PING")
         while not stop.is_set():
             try:
                 while True:
@@ -289,37 +271,24 @@ def job_monitor(port, commands, emit, stop):
                     elif item[0] == "test":
                         module, step = item[1], item[2]
                         deadline = time.time() + TEST_TIMEOUT.get(module, 6.0)
-                        if session.prefix == "VOI":
-                            if module not in LEGACY_TESTS:
-                                emit("test", module, step, False,
-                                     "Firmware Voi cũ chưa có bài kiểm tra này. Nạp firmware Robo Dev để dùng.")
-                                continue
-                            command, needle = LEGACY_TESTS[module]
-                            session.send(command)
-                            pending[module] = (step, (needle,), True, deadline)
-                        else:
-                            session.send(f"RD_TEST {module} {step}")
-                            pending[module] = (step, (f"RD_TEST_OK {module}", f"RD_TEST_ERR {module}"), False, deadline)
+                        session.send(f"RD_TEST {module} {step}")
+                        pending[module] = (step, (f"RD_TEST_OK {module}", f"RD_TEST_ERR {module}"), deadline)
             except queue.Empty:
                 pass
             for line in session.read_lines():
-                m = re.search(r"(RD|VOI)_PONG\s*(.*)$", line)
+                m = re.search(r"RD_PONG\s*(.*)$", line)
                 if m:
-                    session.prefix = m.group(1)
-                    emit("firmware", m.group(1), m.group(2).strip())
-                for module, (step, needles, legacy, _) in list(pending.items()):
+                    emit("firmware", m.group(1).strip())
+                for module, (step, needles, _) in list(pending.items()):
                     hit = next((n for n in needles if n in line), None)
                     if not hit:
                         continue
                     del pending[module]
-                    if legacy:
-                        ok, text = _legacy_result(module, line)
-                    else:
-                        ok = hit.startswith("RD_TEST_OK")
-                        text = line.split(hit, 1)[1].strip()
+                    ok = hit.startswith("RD_TEST_OK")
+                    text = line.split(hit, 1)[1].strip()
                     emit("test", module, step, ok, text)
             now = time.time()
-            for module, (step, _, _, deadline) in list(pending.items()):
+            for module, (step, _, deadline) in list(pending.items()):
                 if now > deadline:
                     del pending[module]
                     emit("test", module, step, False, "Mạch không trả lời bài kiểm tra")
@@ -335,8 +304,8 @@ def job_run_command(port, name, emit, stop):
         if not _boot(session, emit, stop):
             emit("done", False, "Mạch không trả lời.")
             return
-        if session.prefix != "RD":
-            emit("done", False, "Firmware trên mạch chưa hỗ trợ lệnh tùy chỉnh. Hãy nạp firmware Robo Dev.")
+        if "commands" not in (session.info() or {}).get("caps", []):
+            emit("done", False, "Bản firmware trên mạch chưa hỗ trợ lệnh tùy chỉnh.")
             return
         line = session.request(f"RD_RUN {name}", "RD_RUN_OK", timeout=profile.MAX_RUN_MS / 1000 + 5)
         if line and "RD_RUN_OK" in line:

@@ -76,18 +76,18 @@ Hai đường đưa thay đổi xuống mạch:
 | **Cấu hình** (mặc định) | Đổi chân, bật/tắt module, thông số, lệnh tùy chỉnh, màu LED | Gửi JSON qua COM bằng `RD_CFG`, mạch lưu NVS rồi khởi động lại | Giữ nguyên |
 | **Nạp** | Lần đầu, cập nhật phiên bản, đổi cụm gọi (wake word) | Ghi file firmware bằng esptool | Nạp nhanh giữ Wi-Fi; nạp đầy đủ thì xóa Wi-Fi, ứng dụng gửi lại |
 
-Đường "biên dịch lại bằng ESP-IDF" chỉ dành cho nhà phát triển Robo Dev (build bản phát hành), không bắt người dùng v1 làm. Ứng dụng có chế độ nâng cao gọi ESP-IDF nếu máy có sẵn, dùng lại bộ chạy build của Voi Studio.
+Đường "biên dịch lại bằng ESP-IDF" chỉ dành cho nhà phát triển Robo Dev (build bản phát hành), không bắt người dùng v1 làm. Ứng dụng có chế độ nâng cao gọi ESP-IDF nếu máy có sẵn (`app/robodev/core/idf_build.py`, chưa gắn vào giao diện).
 
 ## 4. Firmware base Robo Dev
 
 ### 4.1 Nguồn gốc
 
-Firmware là bản copy của xiaozhi-esp32 trong workspace (upstream `78/xiaozhi-esp32`, commit `e076ac4`) cùng các sửa đổi đã chạy thật trên mạch:
+Firmware xây trên thư viện xiaozhi-esp32 (upstream `78/xiaozhi-esp32`, commit `e076ac4`), tách rõ phần của mình và phần thư viện (chi tiết `firmware/README.md`):
 
-- `main/audio/audio_service.*`: thêm `PlayPcm()` để phát âm thanh thử và chuông.
-- `main/audio/codecs/no_audio_codec.*`: chỉnh cho codec simplex.
-- `main/assets/locales/vi-VN/language.json`: 15 chuỗi tiếng Việt đã sửa.
-- Board `ai-box-robot-s3cam`: đây là điểm xuất phát cho board mới `robo-dev-s3`.
+- `firmware/xiaozhi-esp32/`: thư viện, là git submodule; repo chỉ lưu địa chỉ và mã commit, không chứa code thư viện.
+- `firmware/robo-dev-s3/`: code board của robot, gắn vào `xiaozhi-esp32/main/boards/` khi build.
+- `firmware/patches/`: các chỗ buộc phải sửa trong thư viện, mỗi chủ đề một file: đăng ký board, số phiên bản, `PlayPcm()` để phát âm thanh thử, độ lớn mic INMP441, chuỗi tiếng Việt.
+- `firmware/build.ps1`: áp patch, gắn board, build.
 
 Theo quy tắc của xiaozhi-esp32, danh tính board ảnh hưởng tương thích OTA. Vì vậy Robo Dev dùng tên board riêng `robo-dev-s3` và không sửa board cũ.
 
@@ -113,7 +113,7 @@ Devkit có hai cổng USB-C: cổng COM qua chip CH343 (UART0, GPIO43/44) và c�
 
 Ứng dụng nhận biết cổng người dùng đang cắm qua USB VID (CH343 `1A86`, USB native Espressif `303A`), rồi chọn biến thể tương ứng và khóa đúng các chân đó trong bộ kiểm tra. `serial_setup.h` tham khảo đã có cả hai nhánh UART và USB-Serial-JTAG.
 
-Chân mặc định lấy theo cách nối trên mạch đang chạy (`config.h` của `ai-box-robot-s3cam`, biến thể USB vì LCD dùng GPIO43/44):
+Chân mặc định lấy theo cách nối trên mạch đang chạy (`config.h` của `robo-dev-s3`, biến thể USB vì LCD dùng GPIO43/44):
 
 | Module | Tín hiệu | GPIO mặc định |
 | --- | --- | --- |
@@ -125,7 +125,7 @@ Chân mặc định lấy theo cách nối trên mạch đang chạy (`config.h`
 | LED WS2812 | DIN | 48 |
 | Nút BOOT | - | 0 |
 
-Biến thể UART không dùng được GPIO43/44, nên nó cần một bộ chân mặc định khác cho DC/RST của LCD. Tài liệu Voi Studio cũ có một bảng nối khác (LCD 19/20/21/47...) cho cách nối dùng cổng COM. **[cần kiểm chứng: bảng nào đúng với mạch thật, xem `docs/hardware.md`]**
+Biến thể UART không dùng được GPIO43/44, nên nó cần một bộ chân mặc định khác cho DC/RST của LCD. Sơ đồ nối dây cũ (`docs/hardware/so-do-noi-day.svg`) vẽ một bảng nối khác (LCD 19/20/21/47...) cho cách nối dùng cổng COM. **[cần kiểm chứng: bảng nào đúng với mạch thật, xem `docs/hardware.md`]**
 
 ### 4.4 Dữ liệu cấu hình
 
@@ -156,7 +156,7 @@ Giới hạn cần tôn trọng: vùng NVS chỉ có 16 KB (0x4000) và mỗi d�
 
 ### 4.5 Lệnh COM `RD_*`
 
-Lệnh và trả lời đều là một dòng, đổi tiền tố `VOI_` của bản tham khảo thành `RD_`. Mạch không trả lời `RD_PING` nghĩa là không phải firmware Robo Dev.
+Lệnh và trả lời đều là một dòng, tiền tố `RD_`. `RD_INFO` báo danh sách khả năng (`caps`), ví dụ `hw` (đổi chân lúc chạy), `commands` (lệnh tùy chỉnh); chương trình chỉ bật chức năng mà firmware báo có. Mạch không trả lời `RD_PING` nghĩa là không phải firmware Robo Dev.
 
 | Lệnh | Trả lời | Dùng để |
 | --- | --- | --- |
@@ -275,7 +275,7 @@ Cạnh trình hướng dẫn là khung **log trực tiếp**: lọc theo mức (
 | Nạp đầy đủ | Toàn bộ từ 0x0 (`merged-binary.bin`) | Mất (NVS bị ghi đè), ứng dụng gửi lại | Mạch mới, đổi biến thể, sửa lỗi nặng |
 | Nạp nhanh | `ota_0` tại 0x20000 + `otadata` 0xd000, thêm `assets` 0x800000 khi cần | Giữ nguyên | Cập nhật phiên bản, đổi wake word |
 
-Các bước trên đã chạy thật ở Voi Studio (nạp đầy đủ 13,5 MB mất 149 giây qua COM; nạp nhanh giữ được Wi-Fi). Robo Dev dùng lại phần code đó.
+Các bước trên đã chạy thật với công cụ nạp của dự án thử nghiệm trước đó (nạp đầy đủ 13,5 MB mất 149 giây qua COM; nạp nhanh giữ được Wi-Fi). Robo Dev dùng lại phần code đó.
 
 Trước khi ghi, ứng dụng đọc chip và dung lượng flash. Nếu không phải ESP32-S3 16 MB thì từ chối và nói rõ lý do. Nạp nhanh chỉ được phép khi bảng phân vùng trên mạch khớp (so MD5).
 
@@ -304,21 +304,23 @@ Bố cục: thanh bên trái gồm 6 bước theo thứ tự, mỗi bước có 
 
 Hồ sơ dự án lưu thành file `*.robodev.json` (chân + cấu hình + tên robot), mở lại được và dùng cho nhiều mạch. Nút **Áp dụng** luôn nói trước nó sẽ làm gì ("Chỉ gửi cấu hình, mạch khởi động lại, Wi-Fi giữ nguyên"). Sau khi áp dụng, ứng dụng đọc lại `RD_HW_GET` / `RD_CFG_GET` để xác nhận mạch đang dùng đúng hồ sơ.
 
-Công nghệ: **PySide6 (Qt 6)**, thay cho Tkinter của Voi Studio, vì yêu cầu giao diện đẹp và chuẩn UX: theme sáng/tối, vẽ hình devkit tùy biến, hiệu ứng, chữ tiếng Việt hiển thị tốt. Bản đóng gói lớn hơn Tkinter (chỉ dùng `PySide6-Essentials`). Mọi việc chạy lâu (nạp, kiểm tra, đọc log) chạy trong luồng nền và gửi sự kiện về giao diện qua tín hiệu Qt, nên giao diện không bao giờ bị treo.
+Công nghệ: **PySide6 (Qt 6)**, thay cho Tkinter của công cụ thử nghiệm trước đó, vì yêu cầu giao diện đẹp và chuẩn UX: theme sáng/tối, vẽ hình devkit tùy biến, hiệu ứng, chữ tiếng Việt hiển thị tốt. Bản đóng gói lớn hơn Tkinter (chỉ dùng `PySide6-Essentials`). Mọi việc chạy lâu (nạp, kiểm tra, đọc log) chạy trong luồng nền và gửi sự kiện về giao diện qua tín hiệu Qt, nên giao diện không bao giờ bị treo.
 
-Ứng dụng nói chuyện được với cả **firmware Voi cũ** (lệnh `VOI_*`): nạp, gửi cấu hình, Wi-Fi, kích hoạt, kiểm tra loa/mic/cảm biến. Đổi chân và lệnh tùy chỉnh chỉ bật khi mạch trả lời `RD_PONG`. Có **mạch mô phỏng** (cổng `DEMO`) trả lời giống firmware Robo Dev để thử toàn bộ chương trình khi chưa có mạch hoặc chưa có firmware.
+Đổi chân và lệnh tùy chỉnh chỉ bật khi firmware báo khả năng `hw` / `commands` trong `RD_INFO`; bản firmware 1.0.0 hiện tại chưa có hai khả năng này nên chương trình hiện thông báo và gửi phần còn lại. Có **mạch mô phỏng** (cổng `DEMO`) trả lời giống firmware Robo Dev để thử toàn bộ chương trình khi chưa có mạch hoặc chưa có firmware.
 
 ## 10. Cấu trúc thư mục và mã nguồn copy vào
 
-Robo Dev tự chứa: mọi mã nguồn tham khảo cần dùng được **copy vào** `Robo-Dev/`, không trỏ ra thư mục khác trong workspace. Sau khi copy, các thư mục cũ chỉ còn để đối chiếu.
+Robo Dev tự chứa: mọi mã nguồn tham khảo cần dùng được **copy vào** `Robo-Dev/`, không trỏ ra thư mục khác trong workspace. Việc chép đã xong ngày 16/10/2026; các thư mục thử nghiệm cũ đã bị xóa và toàn bộ dự án dùng một tên thống nhất là Robo Dev.
 
 ```
 Robo-Dev/
   document.md               tài liệu này
   CLAUDE.md, README.md
-  firmware/                 dự án ESP-IDF (copy từ xiaozhi-esp32)
-    main/boards/robo-dev-s3/  board mới, phát triển từ ai-box-robot-s3cam
-    UPSTREAM.md             commit upstream gốc + danh sách sửa đổi lõi
+  firmware/
+    xiaozhi-esp32/          thư viện xiaozhi-esp32 (git submodule, không sửa trực tiếp)
+    robo-dev-s3/            board của robot (code của mình)
+    patches/                sửa bắt buộc trong thư viện, mỗi chủ đề một file
+    build.ps1, idf-env.ps1  build; mở môi trường ESP-IDF
   app/                      ứng dụng Python (python -m robodev)
     robodev/
       __main__.py           điểm vào (--demo, --theme, --shot)
@@ -327,32 +329,32 @@ Robo-Dev/
         pins.py             luật kiểm tra chân
         profile.py          hồ sơ, mặc định, khối hw/cfg gửi xuống mạch, lệnh tùy chỉnh
         firmware.py         gói firmware (thư mục có manifest.json)
-        link.py             cổng COM, esptool, phiên lệnh RD_*/VOI_*, theo dõi kích hoạt
+        link.py             cổng COM, esptool, phiên lệnh RD_*, theo dõi kích hoạt
         jobs.py             việc nền: kiểm tra, nạp, áp dụng, Wi-Fi, xem log + kiểm tra module
         simulator.py        mạch mô phỏng (cổng DEMO)
+        idf_build.py        build firmware bằng ESP-IDF (chế độ nâng cao, chưa gắn giao diện)
       ui/                   PySide6: theme, icon, thành phần chung, hình devkit, 6 trang
       data/                 board-esp32s3-n16r8.json, modules.json, firmware_defaults.json, ảnh
     firmware/               gói firmware (.bin không commit, manifest.json có commit)
     tests/                  kiểm thử lõi và luồng đầy đủ trên mạch mô phỏng
     requirements.txt        PySide6-Essentials, esptool, pyserial
     build_exe.py            đóng gói PyInstaller
-  docs/                     phần cứng, sơ đồ nối dây, hướng dẫn người dùng
+  docs/                     phần cứng, sơ đồ nối dây, ảnh mạch, hướng dẫn người dùng
   releases/                 (không commit) file firmware build ra
 ```
 
-Nguồn copy:
+Nguồn đã chép (16/10/2026, sau đó đổi tên thống nhất thành Robo Dev):
 
-| Từ | Đến | Ghi chú |
+| Từ (dự án thử nghiệm) | Đến | Ghi chú |
 | --- | --- | --- |
-| `xiaozhi-esp32/` (trừ `build/`, `managed_components/`, `sdkconfig*`, `.git`) | `firmware/` | Giữ sửa đổi lõi; ghi commit `e076ac4` vào `UPSTREAM.md` |
-| `xiaozhi-esp32/main/boards/ai-box-robot-s3cam/` | `firmware/main/boards/robo-dev-s3/` | Đổi tên lớp, `voi_*` thành `rd_*`, `VOI_` thành `RD_`; thêm Kconfig/CMake/`config.json` cho board mới với hai biến thể |
-| `Voi-Studio/studio/link.py`, `jobs.py`, `advanced.py`, `voi_profile.py`, `devices.py` | `app/robodev/` | Lõi nạp, phiên COM, kích hoạt đã chạy thật; đổi giao thức sang `RD_*` |
-| `Voi-Studio/studio/app.py` | tham khảo cho `app/robodev/ui/` | Viết lại bằng PySide6 theo bố cục 6 bước |
-| `Voi-Studio/firmware/*.bin` | `app/firmware/voi-zin-1.0/` | Gói firmware Voi (Zin 1.0) để nạp thử khi chưa có firmware Robo Dev |
-| `Voi-Studio/assets/photos/`, `so-do-noi-day-voi.png` | `app/robodev/data/` | Ảnh linh kiện |
-| `Voi-Studio/build_exe.py`, `package_firmware.py` | `app/` | Đóng gói |
+| `xiaozhi-esp32/` | `firmware/xiaozhi-esp32/` (submodule) + `firmware/patches/` | Thư viện lấy thẳng từ GitHub; phần mình sửa tách thành patch |
+| Board robot của dự án thử nghiệm | `firmware/robo-dev-s3/` | Đổi tên lớp, file, lệnh `RD_*`, NVS `robodev` |
+| Mã nguồn công cụ nạp/cấu hình (Tkinter) | `app/robodev/core/` | Lõi nạp, phiên COM, kích hoạt đã chạy thật; giao diện viết lại bằng PySide6 |
+| Bộ chạy build ESP-IDF | `app/robodev/core/idf_build.py` | Cho chế độ nâng cao (đổi cụm gọi) |
+| Đề xuất phiên bản 2 | `docs/de-xuat-v2.md` | |
+| Ảnh linh kiện, sơ đồ nối dây | `app/robodev/data/photos/`, `docs/hardware/` | |
 
-Code tham khảo còn có một số tính năng chưa nằm trong yêu cầu v1: chuông báo giờ (`alarm_chime.h`), trò chơi rắn (`snake_scene.h`), thời tiết (`voi_weather.h`). Đề xuất copy theo nhưng để tắt mặc định (xem câu hỏi mở).
+Board còn có một số tính năng chưa nằm trong yêu cầu v1: chuông báo giờ (`alarm_chime.h`), trò chơi rắn (`snake_scene.h`), thời tiết (`robot_weather.h`). Đề xuất giữ nhưng để tắt mặc định (xem câu hỏi mở).
 
 Upstream xiaozhi-esp32 có khoảng 50 thư mục board (nhiều board có nhiều biến thể). Ban đầu cứ giữ nguyên để không phải sửa chuỗi `Kconfig`/`CMakeLists`. Sau khi board `robo-dev-s3` build được, có thể dọn bớt để repo gọn hơn.
 
@@ -399,8 +401,8 @@ Mỗi giai đoạn chỉ bắt đầu khi cổng kiểm thử của giai đoạn
 
 ## 14. Câu hỏi mở
 
-1. **Bảng chân mặc định:** mạch đang dùng nối theo `config.h` (LCD trên GPIO43/44, log qua USB native) hay theo bảng cũ trong Voi Studio (log qua cổng COM)? Có cần phát hành cả hai biến thể ngay từ v1 không?
-2. **Tên hiển thị:** robot mặc định tên gì ("Voi", "Robo"...)? Tên này dùng trong câu báo vật cản và mẫu prompt.
+1. **Bảng chân mặc định:** mạch đang dùng nối theo `config.h` (LCD trên GPIO43/44, log qua USB native) hay theo bảng cũ trong sơ đồ nối dây (log qua cổng COM)? Có cần phát hành cả hai biến thể ngay từ v1 không?
+2. ~~**Tên hiển thị:** robot mặc định tên gì?~~ Đã chốt: **Robo**.
 3. **Tính năng phụ** của bản tham khảo (chuông báo giờ, trò chơi rắn, thời tiết): giữ ở v1 (tắt mặc định) hay bỏ?
 4. ~~**Repo GitHub:** có đổi tên repo thành `Robo-Dev` không?~~ Đã xong: repo là `zenix-vn/Robo-Dev`.
 5. **Phát hành:** dùng GitHub Releases của repo này cho firmware và `.exe`, hay nơi khác?
@@ -414,8 +416,9 @@ Cập nhật 16/10/2026.
 | --- | --- | --- |
 | Lõi ứng dụng (`core/`): danh mục, luật chân, hồ sơ, gói firmware, phiên COM, việc nền | Xong | 15 kiểm thử tự động; luồng nạp → cấu hình → Wi-Fi → mã kích hoạt chạy hết trên mạch mô phỏng |
 | Giao diện 6 bước, theme sáng/tối, thanh Áp dụng, hồ sơ `*.robodev.json` | Xong | Chạy tự động các luồng chính trên mạch mô phỏng, chụp ảnh kiểm tra từng trang |
-| Tương thích firmware Voi (Zin 1.0) | Xong trong code | Chưa thử lại trên mạch thật bằng Robo Dev |
-| Firmware Robo Dev (`firmware/`, lệnh `RD_*`, chân lúc chạy) | Chưa làm (giai đoạn 0-1) | - |
+| Firmware Robo Dev 1.0.0 (board `robo-dev-s3`, lệnh `RD_*` gồm `RD_TEST` cho loa/mic/cảm biến, `caps`) | Xong, build được | Chưa nạp thử lên mạch thật |
+| Chép mã nguồn firmware vào `firmware/`, đổi tên thống nhất Robo Dev | Xong | Build bằng ESP-IDF v6.1 |
+| Đổi chân lúc chạy (`RD_HW`, caps `hw`), lệnh tùy chỉnh (`RD_RUN`, caps `commands`) | Chưa làm (giai đoạn 1, 4) | - |
 | Cập nhật qua GitHub Releases, gói wake word, chế độ build ESP-IDF | Chưa làm | - |
 | Đóng gói `.exe` (`app/build_exe.py`) | Có script | Chưa chạy thử |
 

@@ -1,9 +1,10 @@
 """Thành phần giao diện dùng chung."""
-from PySide6.QtCore import (Property, QEasingCurve, QPoint, QPropertyAnimation, QRectF, QSize, Qt, QTimer,
-                            Signal)
+from PySide6.QtCore import (Property, QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, QRectF, QSize, Qt,
+                            QTimer, Signal)
 from PySide6.QtGui import QColor, QPainter, QPen
-from PySide6.QtWidgets import (QAbstractButton, QButtonGroup, QColorDialog, QFrame, QGraphicsDropShadowEffect,
-                               QHBoxLayout, QLabel, QPushButton, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QAbstractScrollArea, QAbstractSpinBox, QApplication, QButtonGroup,
+                               QColorDialog, QComboBox, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel,
+                               QPushButton, QSizePolicy, QSlider, QToolButton, QVBoxLayout, QWidget)
 
 from robodev.ui import icons, theme
 
@@ -99,6 +100,28 @@ def icon_label(name, color, size=18):
     lab.setPixmap(icons.pixmap(name, color, size))
     lab.setFixedSize(size, size)
     return lab
+
+
+class WheelGuard(QObject):
+    """Ô chọn, ô số, thanh trượt chỉ đổi giá trị bằng con lăn khi đã được bấm chọn (có focus).
+
+    Chưa chọn thì con lăn cuộn trang như bình thường, tránh lỡ tay đổi chân GPIO khi cuộn qua.
+    """
+    GUARDED = (QComboBox, QAbstractSpinBox, QSlider)
+
+    def eventFilter(self, obj, event):  # noqa: N802
+        if not isinstance(obj, self.GUARDED):
+            return False
+        if event.type() == QEvent.Polish:
+            obj.setFocusPolicy(Qt.StrongFocus)
+        elif event.type() == QEvent.Wheel and not obj.hasFocus():
+            area = obj.parentWidget()
+            while area is not None and not isinstance(area, QAbstractScrollArea):
+                area = area.parentWidget()
+            if area is not None:
+                QApplication.sendEvent(area.verticalScrollBar(), event)
+            return True
+        return False
 
 
 def clear_layout(layout):

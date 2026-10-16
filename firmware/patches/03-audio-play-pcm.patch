@@ -1,0 +1,50 @@
+diff --git a/main/audio/audio_service.cc b/main/audio/audio_service.cc
+index 7f7582b..204004f 100644
+--- a/main/audio/audio_service.cc
++++ b/main/audio/audio_service.cc
+@@ -785,6 +785,31 @@ void AudioService::PlaySound(const std::string_view& ogg) {
+     demuxer->Process(buf, size);
+ }
+ 
++bool AudioService::PlayPcm(std::vector<int16_t> pcm) {
++    if (!codec_->output_enabled()) {
++        esp_timer_stop(audio_power_timer_);
++        esp_timer_start_periodic(audio_power_timer_, AUDIO_POWER_CHECK_INTERVAL_MS * 1000);
++        codec_->EnableOutput(true);
++    }
++
++    std::unique_lock<std::mutex> lock(audio_queue_mutex_);
++    const uint32_t generation = playback_generation_;
++    audio_queue_cv_.wait(lock, [this, generation]() {
++        return service_stopped_.load() || generation != playback_generation_ ||
++               audio_playback_queue_.size() < MAX_PLAYBACK_TASKS_IN_QUEUE;
++    });
++    if (service_stopped_.load() || generation != playback_generation_) {
++        return false;
++    }
++    AudioTask task;
++    task.type = kAudioTaskTypeDecodeToPlaybackQueue;
++    task.pcm = std::move(pcm);
++    playback_drained_notified_ = false;
++    audio_playback_queue_.push_back(std::move(task));
++    audio_queue_cv_.notify_all();
++    return true;
++}
++
+ bool AudioService::IsIdle() {
+     std::lock_guard<std::mutex> lock(audio_queue_mutex_);
+     return audio_encode_queue_.empty() && IsPlaybackDrainedLocked() && audio_testing_queue_.empty();
+diff --git a/main/audio/audio_service.h b/main/audio/audio_service.h
+index f8b510f..81c785f 100644
+--- a/main/audio/audio_service.h
++++ b/main/audio/audio_service.h
+@@ -144,6 +144,9 @@ public:
+     bool PushPacketToDecodeQueue(std::unique_ptr<AudioStreamPacket> packet, bool wait = false);
+     std::unique_ptr<AudioStreamPacket> PopPacketFromSendQueue();
+     void PlaySound(const std::string_view& sound);
++    // Queues raw PCM (mono, at the codec output sample rate) for playback. Blocks while the playback
++    // queue is full; returns false if playback was reset or the service stopped.
++    bool PlayPcm(std::vector<int16_t> pcm);
+     bool ReadAudioData(std::vector<int16_t>& data, int sample_rate, int samples);
+     void ResetDecoder();
+     void SetModelsList(srmodel_list_t* models_list);

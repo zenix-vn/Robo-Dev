@@ -1,0 +1,2 @@
+# Patch phải giữ xuống dòng LF để git apply khớp với thư viện xiaozhi-esp32 (LF)
+*.patch text eol=lf

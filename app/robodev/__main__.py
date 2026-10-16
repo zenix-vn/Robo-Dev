@@ -12,6 +12,7 @@ from robodev.core import link
 from robodev.ui import icons, theme
 from robodev.ui.main_window import PAGES, MainWindow
 from robodev.ui.state import AppState
+from robodev.ui.widgets import WheelGuard
 
 
 def main(argv=None):
@@ -27,6 +28,8 @@ def main(argv=None):
     app.setApplicationName(APP_NAME)
     app.setOrganizationName("RoboDev")
     app.setStyle("Fusion")
+    wheel_guard = WheelGuard(app)
+    app.installEventFilter(wheel_guard)
 
     state = AppState()
     name = args.theme or state.settings.value("theme", "light")

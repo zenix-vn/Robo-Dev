@@ -2,13 +2,14 @@
 
 Board ESP32-S3-N16R8 (flash 16 MB, PSRAM 8 MB). Sơ đồ nối dây trong thư mục [hardware/](hardware/):
 
-- `so-do-noi-day-voi.png` / `.svg`: sơ đồ nối dây robot Voi.
+- `so-do-noi-day.png` / `.svg`: sơ đồ nối dây robot (vẽ theo bảng chân **cũ**, chưa cập nhật theo `config.h`).
+- `photos/`: ảnh mạch thật.
 - `so-do-mach-thuc-te.svg`: sơ đồ theo mạch thực tế.
 - `so-do-test-mic-loa.png` / `.svg`: sơ đồ test mic và loa.
 
 ## Bảng chân GPIO
 
-> Cần xác nhận lại với dây nối thực tế. Hai nguồn trong dự án cũ đang khác nhau: bảng dưới lấy từ `config.h` của board `ai-box-robot-s3cam` (bản đang build), còn `Voi-Studio/docs.md` ghi một bảng chân khác.
+> Bảng dưới lấy từ `config.h` của board `robo-dev-s3` (firmware đang chạy trên mạch). Sơ đồ `so-do-noi-day` vẽ theo một bảng chân cũ hơn (mic 1/2/42, LCD 19/20/21/47...), cần vẽ lại.
 
 | Thiết bị | Chân thiết bị | GPIO |
 | --- | --- | --- |

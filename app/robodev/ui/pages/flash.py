@@ -186,9 +186,7 @@ class FlashPage(Page):
             self.package_note.setText("Đặt gói firmware (thư mục có manifest.json) vào thư mục firmware/ cạnh chương trình, "
                                       "hoặc bấm “Chọn file...”.")
         else:
-            kind = "Firmware Robo Dev: đổi được chân và lệnh." if pkg.protocol == "RD" else \
-                "Firmware Voi (cũ): chân cố định, không có lệnh tùy chỉnh."
-            self.package_note.setText(kind + (" " + pkg.notes if pkg.notes and pkg.protocol == "RD" else ""))
+            self.package_note.setText(pkg.notes or "Firmware Robo Dev.")
             fast_ok = all(pkg.has(r) for r in firmware.FAST_FILES)
             self.mode_fast.setEnabled(fast_ok)
             if not fast_ok:

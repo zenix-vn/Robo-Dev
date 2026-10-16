@@ -514,8 +514,8 @@ class CommandsPage(Page):
         reason = ""
         if not st.port:
             reason = "Chọn cổng mạch để chạy thử."
-        elif st.prefix == "VOI":
-            reason = "Firmware Voi (cũ) chưa hỗ trợ lệnh tùy chỉnh."
+        elif not st.supports("commands"):
+            reason = "Bản firmware trên mạch chưa hỗ trợ lệnh tùy chỉnh."
         elif name and st.project.get("commands", {}).get(name) != st.applied.get("commands", {}).get(name):
             reason = "Lệnh vừa sửa: bấm Áp dụng để gửi xuống mạch trước khi chạy thử."
         self.run_btn.setEnabled(bool(name) and not reason and not st.runner.busy)
@@ -579,9 +579,9 @@ class CommandsPage(Page):
         self.update_run_button()
 
     def update_legacy(self):
-        self.legacy.setVisible(self.state.prefix == "VOI")
-        self.legacy.set("Firmware Voi (cũ) chỉ có các lệnh có sẵn. <b>Lệnh tùy chỉnh</b> cần firmware Robo Dev.",
-                        "warning")
+        self.legacy.setVisible(not self.state.supports("commands"))
+        self.legacy.set(f"Bản firmware trên mạch (<b>{self.state.version}</b>) chỉ có các lệnh có sẵn. "
+                        "<b>Lệnh tùy chỉnh</b> sẽ chạy được khi nạp bản firmware có hỗ trợ.", "warning")
         self.update_run_button()
 
     def on_event(self, job_id, event):

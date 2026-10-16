@@ -22,7 +22,7 @@ Tùy chọn khác: `--theme dark`, `--open đường/dẫn.robodev.json`, `--sho
 
 ## Gói firmware
 
-Mỗi gói là một thư mục trong `firmware/` có `manifest.json` (tên, phiên bản, `protocol` RD/VOI, `variant` usb/uart, tên các file `.bin`). File `.bin` không commit. Gói `voi-zin-1.0` lấy từ `Voi-Studio/firmware/`.
+Mỗi gói là một thư mục trong `firmware/` có `manifest.json` (tên, phiên bản, `variant` usb/uart, tên các file `.bin`). Chỉ `manifest.json` được commit; file `.bin` tạo bằng cách build firmware (`../firmware/build.ps1`) rồi chạy `package_firmware.py` (xem README ở gốc repo).
 
 ## Đóng gói `.exe`
 

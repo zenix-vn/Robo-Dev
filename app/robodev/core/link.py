@@ -1,7 +1,7 @@
-"""Giao tiếp với mạch: liệt kê cổng COM, nạp firmware bằng esptool, phiên lệnh RD_* / VOI_* qua cổng log.
+"""Giao tiếp với mạch: liệt kê cổng COM, nạp firmware bằng esptool, phiên lệnh RD_* qua cổng log.
 
-Firmware Robo Dev trả lời lệnh tiền tố RD_. Firmware Voi cũ (dự án thử nghiệm) trả lời VOI_ và chỉ có một
-phần các lệnh; phiên tự nhận ra loại firmware ở lần PING đầu tiên.
+Firmware Robo Dev trả lời các lệnh tiền tố RD_. Lệnh RD_INFO báo danh sách khả năng (`caps`) để chương trình
+biết bản firmware trên mạch hỗ trợ những gì (ví dụ "hw" = đổi chân lúc chạy, "commands" = lệnh tùy chỉnh).
 """
 import hashlib
 import json
@@ -204,7 +204,6 @@ class Session:
     def __init__(self, port, on_line=None, prefer_native=True):
         self.on_line = on_line or (lambda line: None)
         self.flash_port = port
-        self.prefix = None          # "RD" hoặc "VOI", biết sau lần PING đầu
         self.port = port
         if prefer_native and port_kind(port) != "native":
             native = find_native_port(port)
@@ -235,8 +234,9 @@ class Session:
     def send(self, line):
         self.ser.write((line + "\n").encode("utf-8"))
 
-    def cmd(self, name):
-        return f"{self.prefix or 'RD'}_{name}"
+    @staticmethod
+    def cmd(name):
+        return f"RD_{name}"
 
     def read_lines(self):
         chunk = self.ser.read(8192)
@@ -276,7 +276,7 @@ class Session:
 
     def ping(self, timeout=25, stop=None):
         """Đợi mạch khởi động xong và trả lời PONG. Trả về chuỗi phiên bản hoặc None."""
-        needles, probes = ("RD_PONG", "VOI_PONG"), ["RD_PING", "VOI_PING"]
+        needles, probes = ("RD_PONG",), ["RD_PING"]
         first = timeout if self.port == self.flash_port else timeout * 0.6
         line = self.wait_for(needles, first, resend=probes, resend_every=1.0, start_after=2.0, stop=stop)
         if not line and self.port != self.flash_port and not (stop and stop.is_set()):
@@ -290,8 +290,7 @@ class Session:
             line = self.wait_for(needles, timeout - first, resend=probes, resend_every=1.0, start_after=2.0, stop=stop)
         if not line:
             return None
-        self.prefix = "RD" if "RD_PONG" in line else "VOI"
-        return line.split("_PONG", 1)[1].strip()
+        return line.split("RD_PONG", 1)[1].strip()
 
     def _json_reply(self, command, marker, timeout=8):
         line = self.wait_for(marker, timeout, resend=self.cmd(command), resend_every=2.0)

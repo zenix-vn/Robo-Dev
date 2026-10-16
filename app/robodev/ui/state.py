@@ -26,8 +26,8 @@ class AppState(QObject):
         self.applied = copy.deepcopy(self.project)   # bản đã gửi xuống mạch lần cuối
         self.saved = copy.deepcopy(self.project)
         self.port = None
-        self.prefix = None       # "RD" | "VOI" | None (chưa biết)
-        self.version = None
+        self.version = None      # phiên bản firmware Robo Dev trên mạch (None = chưa biết)
+        self.caps = None         # khả năng firmware báo qua RD_INFO (None = chưa biết)
         self.info = None
         self.chip_ok = None
         self.activated = None
@@ -98,15 +98,21 @@ class AppState(QObject):
     def set_port(self, port):
         if port != self.port:
             self.port = port
-            self.prefix = self.version = self.info = self.chip_ok = self.activated = None
+            self.version = self.caps = self.info = self.chip_ok = self.activated = None
             if port:
                 self.settings.setValue("last_port", port)
             self.port_changed.emit(port or "")
             self.device_changed.emit()
 
-    def set_firmware(self, prefix, version):
-        if (prefix, version) != (self.prefix, self.version):
-            self.prefix, self.version = prefix, version
+    def set_firmware(self, version):
+        if version != self.version:
+            self.version = version
+            self.device_changed.emit()
+
+    def set_caps(self, caps):
+        caps = set(caps)
+        if caps != self.caps:
+            self.caps = caps
             self.device_changed.emit()
 
     def set_advanced(self, on):
@@ -118,17 +124,13 @@ class AppState(QObject):
     def is_demo(self):
         return self.port == link.DEMO_PORT
 
-    @property
-    def supports_pins(self):
-        """Firmware trên mạch đổi được chân không (chưa biết thì coi như có)."""
-        return self.prefix != "VOI"
+    def supports(self, cap):
+        """Firmware trên mạch có khả năng `cap` không (chưa biết thì coi như có)."""
+        return self.caps is None or cap in self.caps
 
     @property
     def firmware_label(self):
-        if not self.prefix:
-            return "Chưa kiểm tra"
-        kind = "Robo Dev" if self.prefix == "RD" else "Voi (cũ)"
-        return f"{kind} · {self.version}" if self.version else kind
+        return f"Robo Dev {self.version}" if self.version else "Chưa kiểm tra"
 
 
 class JobRunner(QObject):

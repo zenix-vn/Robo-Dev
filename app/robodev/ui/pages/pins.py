@@ -438,9 +438,10 @@ class PinsPage(Page):
 
     def update_legacy(self):
         st = self.state
-        self.legacy.setVisible(st.prefix == "VOI")
-        self.legacy.set("Mạch đang chạy <b>firmware Voi (cũ)</b>: chân GPIO cố định trong firmware. Thay đổi ở đây "
-                        "sẽ có hiệu lực khi bạn nạp <b>firmware Robo Dev</b>.", "warning")
+        self.legacy.setVisible(not st.supports("hw"))
+        self.legacy.set(f"Bản firmware trên mạch (<b>{st.version}</b>) chưa hỗ trợ đổi chân lúc chạy: chân GPIO đang cố "
+                        "định theo <code>config.h</code>. Thay đổi ở đây sẽ có hiệu lực khi nạp bản firmware có hỗ trợ.",
+                        "warning")
 
     def has_errors(self):
         return any(i.level == "error" for i in pins.validate(self.hw))

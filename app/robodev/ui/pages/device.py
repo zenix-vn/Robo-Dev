@@ -200,10 +200,8 @@ class DevicePage(Page):
             self.port_chip.set("Chưa chọn cổng", "neutral")
         else:
             self.port_chip.set(("Mạch mô phỏng" if st.is_demo else "Cổng " + st.port), "info")
-        if st.prefix == "RD":
-            self.fw_chip.set("Firmware Robo Dev", "ok")
-        elif st.prefix == "VOI":
-            self.fw_chip.set("Firmware Voi (cũ)", "warning")
+        if st.version:
+            self.fw_chip.set("Firmware Robo Dev " + st.version, "ok")
         else:
             self.fw_chip.set("Firmware: chưa kiểm tra", "neutral")
 
@@ -238,11 +236,11 @@ class DevicePage(Page):
             self.t_sensor.set(None, "Chưa biết")
             self.t_net.set(None, "Chưa biết")
             return
-        prefix = result["prefix"]
-        st.set_firmware(prefix, fw[1])
-        self.t_fw.set(True if prefix == "RD" else "warn", ("Robo Dev " if prefix == "RD" else "Voi (cũ) ") + fw[1],
-                      "" if prefix == "RD" else "Firmware thử nghiệm: chân cố định, chưa có lệnh tùy chỉnh.")
+        st.set_firmware(fw[1])
         info = result.get("info") or {}
+        caps = set(info.get("caps", []))
+        missing = [text for cap, text in (("hw", "đổi chân lúc chạy"), ("commands", "lệnh tùy chỉnh")) if cap not in caps]
+        self.t_fw.set(True, "Robo Dev " + fw[1], ("Bản này chưa có: " + ", ".join(missing) + ".") if missing else "")
         st.info = info
         sensor = info.get("sensor")
         if isinstance(sensor, str) and sensor:

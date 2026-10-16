@@ -19,7 +19,7 @@
   "stop_distance_mm": 150,
   "back_off_ms": 500,
   "report_interval_ms": 20000,
-  "report_text": "[Voi vừa chạm phải vật cản phía trước và đã lùi lại]"
+  "report_text": "[Robo vừa chạm phải vật cản phía trước và đã lùi lại]"
  },
  "emotion_motion": {
   "cooldown_ms": 4000,

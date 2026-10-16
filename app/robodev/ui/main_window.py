@@ -270,7 +270,7 @@ class MainWindow(QMainWindow):
 
     def update_nav(self):
         st = self.state
-        self.nav["device"].set_status("ok" if st.chip_ok and st.prefix else None)
+        self.nav["device"].set_status("ok" if st.chip_ok and st.version else None)
         has_errors = any(i.level == "error" for i in pins.validate(st.project["hw"]))
         self.nav["pins"].set_status("error" if has_errors else "ok")
         self.nav["flash"].set_status("ok" if st.activated else None)
@@ -337,10 +337,10 @@ class MainWindow(QMainWindow):
             self.dev_title.setText("Chưa chọn mạch")
             self.dev_sub.setText("Cắm cáp USB-C vào mạch, hoặc chọn DEMO để dùng thử.")
         else:
-            color = theme.c("success") if st.prefix == "RD" else theme.c("warning") if st.prefix == "VOI" else "#7CD4FD"
+            color = theme.c("success") if st.version else "#7CD4FD"
             self.dev_dot.set(color)
             self.dev_title.setText("Mạch mô phỏng" if st.is_demo else f"Mạch trên {st.port}")
-            self.dev_sub.setText(st.firmware_label if st.prefix else "Chưa kiểm tra · bấm Kiểm tra mạch")
+            self.dev_sub.setText(st.firmware_label if st.version else "Chưa kiểm tra · bấm Kiểm tra mạch")
         self.busy_row.setVisible(busy)
         self.busy_label.setText(JOB_LABELS.get(st.runner.job_id, "Đang chạy") + "...")
         self.port_combo.setEnabled(not busy)
@@ -357,7 +357,9 @@ class MainWindow(QMainWindow):
 
     def on_event(self, job_id, event):
         if event[0] == "firmware":
-            self.state.set_firmware(event[1], event[2])
+            self.state.set_firmware(event[1])
+        elif event[0] == "caps":
+            self.state.set_caps(event[1])
         for page in self.pages.values():
             page.on_event(job_id, event)
 

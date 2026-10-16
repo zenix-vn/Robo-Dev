@@ -1,0 +1,30 @@
+diff --git a/main/CMakeLists.txt b/main/CMakeLists.txt
+index 633ef85..a9afc42 100644
+--- a/main/CMakeLists.txt
++++ b/main/CMakeLists.txt
+@@ -825,6 +825,11 @@ elseif(CONFIG_BOARD_TYPE_BREAD_COMPACT_WIFI_CAM)
+     set(BUILTIN_TEXT_FONT font_noto_sans_basic_16_4)
+     set(BUILTIN_ICON_FONT font_material_symbols_16_4)
+     set(DEFAULT_EMOJI_COLLECTION noto-color-emoji_64)
++elseif(CONFIG_BOARD_TYPE_ROBO_DEV_S3)
++    set(BOARD_DIR "robo-dev-s3")
++    set(BUILTIN_TEXT_FONT font_noto_sans_basic_16_4)
++    set(BUILTIN_ICON_FONT font_material_symbols_16_4)
++    set(DEFAULT_EMOJI_COLLECTION otto-gif)
+ elseif(CONFIG_BOARD_TYPE_JIUCHUAN)
+     set(BOARD_DIR "jiuchuan-s3")
+     set(BUILTIN_TEXT_FONT font_noto_sans_basic_20_4)
+diff --git a/main/Kconfig.projbuild b/main/Kconfig.projbuild
+index 6a7c0fb..a8d0384 100644
+--- a/main/Kconfig.projbuild
++++ b/main/Kconfig.projbuild
+@@ -179,6 +179,9 @@ choice BOARD_TYPE
+     config BOARD_TYPE_BREAD_COMPACT_WIFI_CAM
+         bool "Bread Compact Wi-Fi + LCD + Camera (面包板)"
+         depends on IDF_TARGET_ESP32S3
++    config BOARD_TYPE_ROBO_DEV_S3
++        bool "Robo Dev S3 (ESP32-S3-N16R8)"
++        depends on IDF_TARGET_ESP32S3
+     config BOARD_TYPE_CHD_ESP32S3_BOX
+         bool "CHD ESP32-S3-BOX (虫洞)"
+         depends on IDF_TARGET_ESP32S3

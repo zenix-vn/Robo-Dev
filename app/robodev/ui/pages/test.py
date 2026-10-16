@@ -147,8 +147,6 @@ class TestPage(Page):
         super().__init__(state, window, scroll=False)
         self.paused = False
         self.lines = []           # (level, text) để lọc lại
-        self.legacy = Banner("", "warning")
-        self.content.addWidget(self.legacy)
 
         body = hbox(spacing=20)
         # Trái: các bài kiểm tra
@@ -241,10 +239,6 @@ class TestPage(Page):
         self.start_btn.setEnabled(bool(st.port) and not runner.busy)
         self.reset_btn.setEnabled(on)
         self.cmd.setEnabled(on)
-        legacy = st.prefix == "VOI"
-        self.legacy.setVisible(legacy)
-        self.legacy.set("Firmware Voi (cũ) chỉ kiểm tra được <b>loa, mic và cảm biến</b>. Nạp firmware Robo Dev để "
-                        "kiểm tra mọi module.", "warning")
         hw = st.project["hw"]
         for module, card in self.cards.items():
             enabled_module = hw.get(module, {}).get("enabled", True)
@@ -279,7 +273,7 @@ class TestPage(Page):
                 if module in self.cards:
                     self.cards[module].result(ok, text)
             elif kind == "firmware":
-                self.state.set_firmware(event[1], event[2])
+                self.state.set_firmware(event[1])
             elif kind == "done":
                 self.pending.append(f"[Robo Dev] {event[2]}")
                 QTimer.singleShot(50, self.update_state)

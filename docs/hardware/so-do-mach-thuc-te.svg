@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" font-family="Segoe UI, Arial, sans-serif">
   <rect width="1000" height="780" fill="#ffffff"/>
-  <text x="500" y="32" text-anchor="middle" font-size="22" font-weight="700" fill="#111">Sơ đồ đấu dây ai-box-robot-s3cam (đã sửa theo mạch thực tế)</text>
-  <text x="500" y="54" text-anchor="middle" font-size="13" fill="#555">Sơ đồ logic: mỗi dây ghi số GPIO. Khớp với main/boards/ai-box-robot-s3cam/config.h</text>
+  <text x="500" y="32" text-anchor="middle" font-size="22" font-weight="700" fill="#111">Sơ đồ đấu dây robo-dev-s3 (đã sửa theo mạch thực tế)</text>
+  <text x="500" y="54" text-anchor="middle" font-size="13" fill="#555">Sơ đồ logic: mỗi dây ghi số GPIO. Khớp với main/boards/robo-dev-s3/config.h</text>
 
   <!-- ESP32 -->
   <rect x="380" y="80" width="240" height="640" rx="10" fill="#2b2b2b"/>

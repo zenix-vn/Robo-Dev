@@ -2,7 +2,8 @@
 
 Hồ sơ được gửi xuống mạch thành hai khối:
 - `hw`  (lệnh RD_HW): module bật/tắt và chân. Chỉ firmware Robo Dev hiểu khối này.
-- `cfg` (lệnh RD_CFG hoặc VOI_CFG): tính năng, thông số, công cụ MCP, lệnh tùy chỉnh.
+- `cfg` (lệnh RD_CFG): tính năng, thông số, công cụ MCP, lệnh tùy chỉnh.
+Mỗi bản firmware báo khả năng (`caps`) qua RD_INFO; khối nào firmware chưa hỗ trợ thì không gửi.
 Chỉ những khóa khác mặc định mới được gửi để dòng lệnh ngắn.
 """
 import copy
@@ -229,14 +230,13 @@ def minimal_cfg(cfg):
     return out
 
 
-def cfg_payload(project, protocol):
-    """Khối cfg gửi bằng CFG. Firmware Voi cũ không có lệnh tùy chỉnh và không có khối hw."""
+def cfg_payload(project, caps):
+    """Khối cfg gửi bằng RD_CFG, chỉ gồm những gì firmware (theo `caps`) hiểu được."""
     out = minimal_cfg(project["cfg"])
-    if protocol == "RD":
-        if project.get("commands"):
-            out["commands"] = project["commands"]
-        # Động cơ: đảo chiều và hoán đổi bánh nằm trong hw, firmware Voi cũ đọc chúng từ cfg.motors
-    else:
+    if "commands" in caps and project.get("commands"):
+        out["commands"] = project["commands"]
+    if "hw" not in caps:
+        # Firmware chưa có khối hw đọc đảo chiều và hoán đổi bánh từ cfg.motors
         motors = project["hw"].get("motors", {})
         extra = {k: motors[k] for k in ("invert_left", "invert_right", "swap_sides")
                  if k in motors and motors[k] != default_cfg()["motors"].get(k)}
@@ -253,10 +253,10 @@ def compact(data):
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
 
 
-def expected_cfg(project, protocol):
-    """Cấu hình mạch sẽ báo lại qua CFG_GET sau khi áp dụng."""
+def expected_cfg(project, caps):
+    """Cấu hình mạch sẽ báo lại qua RD_CFG_GET sau khi áp dụng."""
     cfg = firmware_defaults()
-    payload = cfg_payload(project, protocol)
+    payload = cfg_payload(project, caps)
     payload.pop("commands", None)
     merge_into(cfg, payload)
     return cfg

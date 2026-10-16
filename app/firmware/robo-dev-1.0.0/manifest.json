@@ -1,0 +1,16 @@
+{
+  "name": "Robo Dev",
+  "version": "1.0.0",
+  "variant": "usb",
+  "chip": "esp32s3",
+  "flash_mb": 16,
+  "notes": "Firmware Robo Dev cho board robo-dev-s3. Chân GPIO cố định theo config.h; chưa hỗ trợ đổi chân lúc chạy và lệnh tùy chỉnh.",
+  "files": {
+    "full": "merged-binary.bin",
+    "app": "xiaozhi.bin",
+    "otadata": "ota_data_initial.bin",
+    "partition_table": "partition-table.bin",
+    "assets": "generated_assets.bin",
+    "bootloader": "bootloader.bin"
+  }
+}

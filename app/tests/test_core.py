@@ -61,18 +61,26 @@ def test_boot_pin_only_for_button():
 # Hồ sơ ----------------------------------------------------------------------------------
 def test_default_cfg_payload_is_minimal():
     project = profile.new_project()
-    assert profile.cfg_payload(project, "RD") == {"version": 1}
-    assert profile.cfg_payload(project, "VOI") == {"version": 1}
+    assert profile.cfg_payload(project, {"cfg", "wifi", "test", "hw", "commands"}) == {"version": 1}
+    assert profile.cfg_payload(project, {"cfg", "wifi", "test"}) == {"version": 1}
 
 
 def test_changes_are_sent_and_expected():
     project = profile.new_project()
     project["cfg"]["motors"]["default_speed"] = 80
     project["hw"]["motors"]["invert_left"] = True
-    voi = profile.cfg_payload(project, "VOI")
-    assert voi["motors"] == {"default_speed": 80, "invert_left": True}
-    assert profile.expected_cfg(project, "VOI")["motors"]["invert_left"] is True
-    assert "invert_left" not in profile.cfg_payload(project, "RD").get("motors", {})
+    # Firmware chưa có khối hw: đảo bánh gửi trong cfg.motors
+    basic = profile.cfg_payload(project, {"cfg", "wifi", "test"})
+    assert basic["motors"] == {"default_speed": 80, "invert_left": True}
+    assert profile.expected_cfg(project, {"cfg", "wifi", "test"})["motors"]["invert_left"] is True
+    assert "invert_left" not in profile.cfg_payload(project, {"cfg", "wifi", "test", "hw", "commands"}).get("motors", {})
+
+
+def test_commands_sent_only_when_supported():
+    project = profile.new_project()
+    project["commands"] = profile.sample_commands()
+    assert "commands" in profile.cfg_payload(project, {"cfg", "wifi", "test", "hw", "commands"})
+    assert "commands" not in profile.cfg_payload(project, {"cfg", "wifi", "test"})
 
 
 def test_roundtrip(tmp_path):
@@ -92,8 +100,8 @@ def test_command_validation():
 
 
 def test_firmware_discovery():
-    names = [p.name for p in firmware.discover()]
-    assert "Voi (Zin 1.0)" in names
+    packages = firmware.discover()
+    assert packages and all(p.name.startswith("Robo Dev") for p in packages)
 
 
 # Luồng với mạch mô phỏng ----------------------------------------------------------------
@@ -101,7 +109,8 @@ def test_demo_check():
     events, emit = collect()
     jobs.job_check(link.DEMO_PORT, emit, threading.Event())
     result = next(e[1] for e in events if e[0] == "check")
-    assert result["chip"][0] and result["firmware"][0] and result["prefix"] == "RD"
+    assert result["chip"][0] and result["firmware"][0]
+    assert "hw" in result["info"]["caps"]
     assert result["info"]["sensor"] == "vl6180x"
 
 
